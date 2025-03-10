@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Route, Routes } from "react-router";
 
 import Home from "./pages/Home";
@@ -29,14 +29,15 @@ import HospitalDoctor from "./pages/HospitalDoctor";
 import HospitalDoctors from "./pages/HospitalDoctors";
 import AddDoctor from "./pages/AddDoctor";
 import HospitalProfileEdit from "./pages/HospitalProfileEdit";
-import EditDoctor from "./pages/EditDoctor";
+
 
 const App = () => {
   const { user } = useUser();
-  const { showHospitalLogin } = useContext(HospitalInfoContext);
-  const { showDoctorLogin } = useContext(DoctorContext);
+  const { showHospitalLogin, hosToken } = useContext(HospitalInfoContext);
+  const { showDoctorLogin, docToken } = useContext(DoctorContext);
   return (
     <div className="">
+      {" "}
       <ToastContainer />
       {showHospitalLogin && <HospitalLogin />}
       {showDoctorLogin && <DoctorLogin />}
@@ -47,41 +48,43 @@ const App = () => {
         <Route path="/doctor" element={<UserDoctorsPage />} />
         <Route path="/doctor/:id" element={<UserDoctorPage />} />
         {user ? (
-          <Route
-            path="/doctor/:id/book-appointment"
-            element={<UserBookAppointment />}
-          />
-        ) : (
-          <Route path="/doctor/:id" element={<UserDoctorPage />} />
-        )}
+          <>
+            <Route
+              path="/doctor/:id/book-appointment"
+              element={<UserBookAppointment />}
+            />
 
-        {user ? (
-          <Route path="/appointment" element={<UserAppointmentPage />} />
-        ) : (
-          <Route path="/doctor/:id" element={<UserDoctorPage />} />
-        )}
-        {user ? (
-          <Route path="/appointment/:id" element={<UserMyAppointment />} />
-        ) : (
-          <Route path="/doctor/:id" element={<UserDoctorPage />} />
-        )}
-        <Route path={`/${user?.fullName}`} element={<UserProfile />} />
+            <Route path="/appointment" element={<UserAppointmentPage />} />
+
+            <Route path="/appointment/:id" element={<UserMyAppointment />} />
+
+            <Route path={`/${user?.fullName}`} element={<UserProfile />} />
+          </>
+        ) : null}
+
         <Route path="/hospital-dashboard" element={<Hospital />}>
-          <Route path="profile" element={<HospitalProfile />} />
-          <Route path="appointment" element={<HospitalAppointments />} />
-          <Route path="appointment/:id" element={<HospitalAppointment />} />
-          <Route path="doctor/:id" element={<HospitalDoctor />} />
-          <Route path="doctor" element={<HospitalDoctors />} />
-          <Route path="add-doctor" element={<AddDoctor />} />
-          <Route path="profile/edit" element={<HospitalProfileEdit />} />
+          {hosToken && (
+            <>
+              <Route path="profile" element={<HospitalProfile />} />
+              <Route path="appointment" element={<HospitalAppointments />} />
+              <Route path="appointment/:id" element={<HospitalAppointment />} />
+              <Route path="doctor/:id" element={<HospitalDoctor />} />
+              <Route path="doctor" element={<HospitalDoctors />} />
+              <Route path="add-doctor" element={<AddDoctor />} />
+              <Route path="profile/edit" element={<HospitalProfileEdit />} />
+            </>
+          )}
         </Route>
         <Route path="/doctor-dashboard" element={<Doctor />}>
-          <Route path="profile" element={<DoctorProfile />} />
-          <Route path="profile/edit" element={<EditDoctor />} />
-          <Route path="appointment" element={<DoctorAppointments />} />
-          <Route path="appointment/:id" element={<DoctorAppointment />} />
+          {docToken ? (
+            <>
+              <Route path="profile" element={<DoctorProfile />} />
+              <Route path="appointment" element={<DoctorAppointments />} />
+              <Route path="appointment/:id" element={<DoctorAppointment />} />
+            </>
+          ) : null}
         </Route>
-      </Routes>
+      </Routes>{" "}
     </div>
   );
 };

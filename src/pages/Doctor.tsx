@@ -1,11 +1,20 @@
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { assets } from "../assets";
-import { BiUserCircle } from "react-icons/bi";
+
 import { BsPenFill } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
+import { useContext } from "react";
+import { DoctorContext } from "../context/DoctorContext";
 
 const Doctor = () => {
   const navigate = useNavigate();
+  const { docData, setDocToken, setDocData } = useContext(DoctorContext);
+  const logout = () => {
+    setDocToken(null);
+    localStorage.removeItem("hospital token");
+    setDocData(null);
+    navigate("/");
+  };
   return (
     <>
       <div className="min-h-screen ">
@@ -19,25 +28,31 @@ const Doctor = () => {
             >
               <img src={assets.Logo} alt="logo" />
             </div>
-            <div className="flex items-center text-white text-2xl gap-1 capitalize">
-              <p className="max-sm:hidden ">
-                welcome <span className="text-blue-300">ridwan</span>
-              </p>
+            {docData && (
+              <div className="flex items-center text-white text-2xl gap-1 capitalize">
+                <p className="max-sm:hidden ">
+                  welcome{" "}
+                  <span className="text-blue-300">
+                    {docData.firstName} {docData.lastName}
+                  </span>
+                </p>
 
-              <div className="relative group">
-                <BiUserCircle className="text-4xl" />
-                <div className="absolute hidden  group-hover:block mt-1  px-7 py-4 bg-black rounded-lg ">
-                  <ul className=" ">
-                    <li
-                      className="cursor-pointer"
-                      onClick={() => console.log("log out")}
-                    >
-                      lognout
-                    </li>
-                  </ul>
+                <div className="relative group">
+                  <img
+                    src={docData.image}
+                    className="w-10 h-10 mx-2 rounded-full"
+                    alt=""
+                  />
+                  <div className="absolute hidden  group-hover:block mt-1  px-7 py-4 bg-black rounded-lg ">
+                    <ul className=" ">
+                      <li className="cursor-pointer" onClick={() => logout()}>
+                        logout
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -47,7 +62,7 @@ const Doctor = () => {
               <NavLink
                 to={"/doctor-dashboard/appointment"}
                 className={({ isActive }) =>
-                  ` cursor-pointer border flex py-2 rounded-lg items-center justify-start md:px-5  gap-4 capitalize font-bold transition-colors ease-in duration-300 ${
+                  ` cursor-pointer border flex py-2 rounded-lg items-center justify-center md:justify-start md:px-5  gap-4 capitalize font-bold transition-colors ease-in duration-300 ${
                     isActive
                       ? "text-white bg   "
                       : " text-blue-500 border-blue-500"
@@ -58,9 +73,9 @@ const Doctor = () => {
                 <span className="max-md:hidden">appiontments</span>
               </NavLink>
               <NavLink
-                to={"/doctor-dashboard/profile"}
+                to={`/doctor-dashboard/profile`}
                 className={({ isActive }) =>
-                  ` cursor-pointer border flex py-2 rounded-lg items-center justify-start md:px-5 gap-4 capitalize font-bold transition-colors ease-in duration-300 ${
+                  ` cursor-pointer border flex py-2 rounded-lg items-center justify-center md:justify-start md:px-5 gap-4 capitalize font-bold transition-colors ease-in duration-300 ${
                     isActive
                       ? "text-white bg   "
                       : " text-blue-500 border-blue-500"

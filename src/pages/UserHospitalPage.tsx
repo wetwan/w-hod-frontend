@@ -5,7 +5,6 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useContext, useEffect, useState } from "react";
 import { HospitalContext } from "../context/HospitalContext";
-import { Hospital } from "../types/type";
 import { BiMailSend } from "react-icons/bi";
 import { FaChair, FaInternetExplorer } from "react-icons/fa6";
 import { BuildingOffice2Icon, PhoneIcon } from "@heroicons/react/24/solid";
@@ -14,7 +13,7 @@ import Button from "../components/Button";
 import Review from "../components/Review";
 import { toast } from "react-toastify";
 import { DoctorContext } from "../context/DoctorContext";
-import { HospitalInfoContext } from "../context/HospitalInfo";
+import { HospitalInfoContext, newHospital } from "../context/HospitalInfo";
 
 const UserHospitalPage = () => {
   const { id } = useParams();
@@ -24,7 +23,7 @@ const UserHospitalPage = () => {
   const { Doctor } = useContext(DoctorContext);
   const { Hospital } = useContext(HospitalInfoContext);
 
-  const [hospData, setHospData] = useState<Hospital | null>(null);
+  const [hospData, setHospData] = useState<newHospital | null>(null);
 
   const fetchHos = async () => {
     const data = Hospital.filter((hos) => hos._id === id);
@@ -74,7 +73,7 @@ const UserHospitalPage = () => {
       <div className="mt-28 w-full p-3">
         <div className=" w-5/6 hidden  md:block h-[40vh] mx-auto">
           <img
-            src={hospData?.picBanner}
+            src={hospData?.banner}
             className="w-full h-full"
             alt="banner pic"
           />
@@ -84,7 +83,7 @@ const UserHospitalPage = () => {
             <div className="px-4 flex items-center justify-between flex-col md:flex-row gap-5  py-3">
               <div className=" rounded-full overflow-hidden  w-28 h-28">
                 <img
-                  src={hospData?.ProfilePic}
+                  src={hospData?.image}
                   className="w-full h-full object-cover"
                   alt="profile pic"
                 />
@@ -92,14 +91,14 @@ const UserHospitalPage = () => {
               <div className="md:w-9/12 w-full ">
                 <p className="border-color px-3 uppercase py-2 w-full text-sm">
                   {" "}
-                  {hospData?.Hospital_Name}
+                  {hospData?.name}
                 </p>
                 <div className="text-sm flex items-center justify-between gap-3 mt-4">
                   <p className="w-5/6 border-color px-3 capitalize py-2 whitespace-nowrap overflow-scroll ">
-                    {hospData?.Address}
+                    {hospData?.address}
                   </p>
                   <p className="border-color px-3 capitalize py-2 text-sm">
-                    {hospData?.AddressState}
+                    {hospData?.state}
                   </p>
                 </div>
               </div>
@@ -116,7 +115,7 @@ const UserHospitalPage = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.Email}
+                    {hospData?.email}
                   </p>
                 </div>
                 <div className="flex my-1 p-1 md:my-0 w-full md:w-1/2 items-center gap-2">
@@ -125,7 +124,7 @@ const UserHospitalPage = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.Website}
+                    {hospData?.website}
                   </p>
                 </div>
               </div>
@@ -136,7 +135,7 @@ const UserHospitalPage = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.Phone_Number}
+                    {hospData?.phone}
                   </p>
                 </div>
               </div>
@@ -153,7 +152,7 @@ const UserHospitalPage = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.Type}
+                    {hospData?.type}
                   </p>
                 </div>
                 <div className="flex my-1 p-1 md:my-0 w-full md:w-1/2 items-center gap-2">
@@ -190,7 +189,7 @@ const UserHospitalPage = () => {
                 {" "}
                 availiable departments
               </h2>
-              <div className=" px-5 flex items-center gap-3 overflow-scroll">
+              {/* <div className=" px-5 flex items-center gap-3 overflow-scroll">
                 {hospData?.Available_Specialists.map((item, i) => (
                   <p
                     className=" border-color w-fit capitalize px-3 py-2 text-center whitespace-nowrap text-sm"
@@ -199,7 +198,7 @@ const UserHospitalPage = () => {
                     {item}
                   </p>
                 ))}
-              </div>
+              </div> */}
             </div>
             <div className="mt-5">
               <h2 className="font-bold capitalize  mb-4 text-lg">
@@ -208,7 +207,7 @@ const UserHospitalPage = () => {
               </h2>
 
               <p className=" border-color w-11/12 mx-auto capitalize px-3 py-2  text-sm leading-relaxed ">
-                {hospData?.About}
+                {hospData?.about}
               </p>
             </div>
             <div className="mt-5">
@@ -217,7 +216,7 @@ const UserHospitalPage = () => {
                 hospital gallery
               </h2>
               <div className=" px-5 w-full overflow-scroll flex items-center gap-3">
-                {hospData?.OtherImages.map((item, i) => (
+                {hospData?.otherImages.map((item, i) => (
                   <div className="w-[300px] h-[100px]" key={i}>
                     <img
                       src={item}
@@ -284,17 +283,15 @@ const UserHospitalPage = () => {
                 hospital doctors
               </h2>
               <div className="text-sm ">
-                {Doctor.filter(
-                  (doc) => hospData?.Hospital_Name === doc.Hospital_Name
-                )
+                {Doctor.filter((doc) => hospData?._id === doc.hospitatId)
                   .slice(0, 5)
                   .map((item) => (
                     <div className="" key={item._id}>
                       <HosDoc
-                        name={item.Name}
+                        name={`${item.firstName} ${item.lastName}`}
                         id={item._id}
-                        field={item.Field}
-                        image={item.ProfilePic}
+                        field={item.field}
+                        image={item.image}
                       />
                     </div>
                   ))}
@@ -306,14 +303,14 @@ const UserHospitalPage = () => {
                 hospital reviwes
               </h2>
               <div className="text-sm ">
-                {hospData?.Review.map((item, i) => (
+                {/* {hospData?.Review.map((item, i) => (
                   <Review
                     key={i}
                     name={item.name}
                     review={item.Comment}
                     email={item.email}
                   />
-                ))}
+                ))} */}
               </div>
             </div>
           </div>

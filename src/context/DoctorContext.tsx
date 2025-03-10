@@ -1,51 +1,59 @@
+/* eslint-disable no-empty */
+
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   createContext,
   useState,
   ReactNode,
   ReactElement,
   useEffect,
+  useContext,
+  // useContext,
 } from "react";
-import { doctors } from "../assets";
+// import { doctorss } from "../assets";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { HospitalInfoContext, newHospital } from "./HospitalInfo";
+import { Appointments } from "./HospitalContext";
 
-type Doctor = {
-  first_Name?: string;
-  last_Name?: string;
+export type Doctors = {
+  firstName: string;
+  lastName: string;
   AddressState: string;
   _id: string;
   Name: string;
   Hospital_Name: string;
-  Email: string;
-  Phone: string;
-  Website: string;
+  email: string;
+  phone: string;
+  website: string;
   College: string;
-  Experience: string;
-  About: string;
-  Field: string;
-  Review: {
-    Rating: number;
-    Comment: string;
-    name: string;
-    email: string;
-  }[];
-  ProfilePic: string;
-  picBanner: string;
-  avalaibility: "online" | "offline";
+  experience: string;
+  about: string;
+  field: string;
+  image: string;
+  hospitatId: string;
+  bannerImage: string;
+  state: string;
+  available: boolean;
+  slot_booked: { [key: string]: string[] };
 };
-export type UseDoctorInfo = {
-  Doctor: Doctor[];
-  setDoctor: (doctors: Doctor[]) => void;
+type UseDoctorInfo = {
+  backendUrl: string;
+  Doctor: Doctors[];
+  doctors: Doctors | null;
+  setDoctor: React.Dispatch<React.SetStateAction<Doctors[]>>;
+  setDoctors: (doctors: Doctors | null) => void;
   name: string;
   setName: (name: string) => void;
   firstName: string;
   setFirstName: (name: string) => void;
   lastName: string;
   setLastName: (name: string) => void;
-  school: string;
-  setSchool: (name: string) => void;
-  experience: Date | null| undefined;
-  setExperience: (experience: Date | null| undefined) => void;
+  college: string;
+  setCollege: (name: string) => void;
+  experience: string;
+  setExperience: (experience: string) => void;
   email: string;
   hospistalName: string;
   setEmail: (email: string) => void;
@@ -54,32 +62,50 @@ export type UseDoctorInfo = {
   setpassword: (password: string) => void;
   comfirmPassword: string;
   setcomfirmPassword: (comfirmPassword: string) => void;
-  image: string;
-  setImage: (image: string) => void;
+  appointment: Appointments[];
+  setAppointment: (appointment: Appointments[]) => void;
   address: string;
   setAddress: (address: string) => void;
-  ofState: string;
-  setOfState: (ofState: string) => void;
+  state: string;
+  setState: (State: string) => void;
   phone: string;
   setPhone: (phone: string) => void;
   website: string;
   setwebsite: (website: string) => void;
 
-  specialist: string;
-  setSpecialist: (specialist: string) => void;
+  field: string;
+  setField: (field: string) => void;
   about: string;
   setAbout: (about: string) => void;
-  bannerPic: File | null;
-  setBannerPic: (bannerPic: File | null) => void;
-  profilePic: File | null;
-  setProfilePic: (profilePic: File | null) => void;
+  bannerImage: File | null;
+  setBannerImage: (bannerImage: File | null) => void;
+  image: File | null;
+  setImage: (image: File | null) => void;
   showDoctorLogin: boolean;
   setShowDoctorLogin: (showDoctorLogin: boolean) => void;
+  fetchDoctor: () => void;
+  fetchDoctorData: () => void;
+  docToken: string | null;
+  setDocToken: React.Dispatch<React.SetStateAction<string | null>>;
+  docData: Doctors | null;
+  setDocData: React.Dispatch<React.SetStateAction<Doctors | null>>;
+  hosData: newHospital | null;
+  sethosData: React.Dispatch<React.SetStateAction<newHospital | null>>;
+  fetchAppointment: () => void;
 };
 
 const initContext: UseDoctorInfo = {
+  sethosData: () => {},
+  backendUrl: "",
+  hosData: null,
+  docToken: "",
+  setDocToken: () => {},
+  docData: null,
+  setDocData: () => {},
   Doctor: [],
+  doctors: null,
   setDoctor: () => {},
+  setDoctors: () => {},
   showDoctorLogin: false,
   setShowDoctorLogin: () => {},
   name: "",
@@ -88,9 +114,9 @@ const initContext: UseDoctorInfo = {
   setFirstName: () => {},
   lastName: "",
   setLastName: () => {},
-  school: "",
-  setSchool: () => {},
-  experience: null,
+  college: "",
+  setCollege: () => {},
+  experience: "",
   setExperience: () => {},
   email: "",
   hospistalName: "",
@@ -101,25 +127,28 @@ const initContext: UseDoctorInfo = {
   setpassword: () => {},
   comfirmPassword: "",
   setcomfirmPassword: () => {},
-  image: "",
-  setImage: () => {},
+  fetchAppointment: () => {},
   address: "",
   setAddress: () => {},
-  ofState: "",
-  setOfState: () => {},
+  state: "",
+  setState: () => {},
   phone: "",
   setPhone: () => {},
   website: "",
   setwebsite: () => {},
+  appointment: [],
 
-  specialist: "",
-  setSpecialist: () => {},
+  field: "",
+  setField: () => {},
   about: "",
   setAbout: () => {},
-  bannerPic: null,
-  setBannerPic: () => {},
-  profilePic: null,
-  setProfilePic: () => {},
+  bannerImage: null,
+  setBannerImage: () => {},
+  image: null,
+  setImage: () => {},
+  fetchDoctor: () => {},
+  fetchDoctorData: () => {},
+  setAppointment: () => {},
 };
 
 export const DoctorContext = createContext<UseDoctorInfo>(initContext);
@@ -129,7 +158,7 @@ const DoctorContextProvider = ({
 }: {
   children?: ReactNode;
 }): ReactElement => {
-  const [Doctor, setDoctor] = useState<Doctor[]>([]);
+  const [Doctor, setDoctor] = useState<Doctors[]>([]);
   const [name, setName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -137,29 +166,122 @@ const DoctorContextProvider = ({
   const [hospistalName, setHospistalName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [image, setImage] = useState("");
   const [address, setAddress] = useState("");
-  const [ofState, setOfState] = useState("");
+  const [state, setState] = useState("");
   const [phone, setPhone] = useState("");
   const [website, setwebsite] = useState("");
-  const [specialist, setSpecialist] = useState("");
+  const [field, setField] = useState("");
   const [about, setAbout] = useState("");
-  const [school, setSchool] = useState("");
-  const [experience, setExperience] = useState<Date | null| undefined>();
+  const [college, setCollege] = useState("");
+  const [experience, setExperience] = useState<string>("");
 
-  const [profilePic, setProfilePic] =useState<File | null>(null);
-  const [bannerPic, setBannerPic] =useState<File | null>(null);
+  const [image, setImage] = useState<File | null>(null);
+  const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [showDoctorLogin, setShowDoctorLogin] = useState(false);
+  const [docToken, setDocToken] = useState<string | null>(null);
+  const [docData, setDocData] = useState<Doctors | null>(null);
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const [doctors, setDoctors] = useState<Doctors | null>(null);
+  const [hosData, sethosData] = useState<newHospital | null>(null);
+  const [appointment, setAppointment] = useState<Appointments[]>([]);
+  const { Hospital } = useContext(HospitalInfoContext);
+
   const fetchDoctor = async () => {
-    setDoctor(doctors);
+    try {
+      const { data } = await axios.get(backendUrl + "/api/user/doctor/");
+      if (data.success) {
+        setDoctor(data.doctors);
+        // setDoctors(data.doctors);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        toast.error(
+          error.response?.data?.message || "An unknown error occurred"
+        );
+      } else {
+        toast.error("An unknown error occurred");
+      }
+    }
   };
   useEffect(() => {
     fetchDoctor();
   }, []);
 
+  useEffect(() => {
+    const fetchhos = async () => {
+      if (docData && docData.hospitatId && Hospital.length > 0) {
+        const data = Hospital.find((hos) => hos._id === docData.hospitatId);
+
+        if (data) {
+          sethosData(data);
+        }
+      }
+    };
+
+    fetchhos();
+  }, [Doctor, Hospital, docData]);
+
+  // fetch hospital data
+  const fetchDoctorData = async () => {
+    try {
+      const { data } = await axios.get(backendUrl + "/api/doctor/", {
+        headers: { token: docToken },
+      });
+      if (data.success) {
+        setDocData(data.doctor);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        toast.error(
+          error.response?.data?.message || "An unknown error occurred"
+        );
+      } else {
+        toast.error("An unknown error occurred");
+      }
+    }
+  };
+  const fetchAppointment = async () => {
+    try {
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("An unknown error occurred");
+      }
+    }
+  };
+  useEffect(() => {
+    if (docToken) {
+      fetchDoctorData();
+      fetchAppointment();
+    }
+  }, [docToken]);
+  useEffect(() => {}, []);
+  useEffect(() => {
+    fetchDoctor();
+    const storedDoctorToken = localStorage.getItem("doctor token");
+    if (storedDoctorToken) {
+      setDocToken(storedDoctorToken);
+    }
+  }, []);
+  useEffect(() => {}, []);
+
   const value: UseDoctorInfo = {
-    school,
-    setSchool,
+    appointment,
+    setAppointment,
+    sethosData,
+    hosData,
+    doctors,
+    setDoctors,
+    backendUrl,
+    docToken,
+    setDocToken,
+    docData,
+    setDocData,
+    college,
+    setCollege,
     setExperience,
     experience,
     firstName,
@@ -184,21 +306,21 @@ const DoctorContextProvider = ({
     setImage,
     address,
     setAddress,
-    ofState,
-    setOfState,
+    state,
+    setState,
     phone,
     setPhone,
     website,
     setwebsite,
-
-    specialist,
-    setSpecialist,
+    fetchAppointment,
+    field,
+    setField,
     about,
     setAbout,
-    bannerPic,
-    setBannerPic,
-    profilePic,
-    setProfilePic,
+    bannerImage,
+    setBannerImage,
+    fetchDoctorData,
+    fetchDoctor,
   };
 
   return (

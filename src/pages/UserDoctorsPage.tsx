@@ -24,7 +24,6 @@ const UserDoctorsPage = () => {
   const { Doctor } = useContext(DoctorContext);
 
   const [doctorField, setDoctorField] = useState<string[]>([]);
-  const [doctorAvali, setDoctorAvali] = useState<string[]>([]);
   const [filterdoctor, setFilterdoctor] = useState(Doctor);
 
   const handleDocotrField = (Field: string) => {
@@ -32,33 +31,27 @@ const UserDoctorsPage = () => {
       prev.includes(Field) ? prev.filter((c) => c !== Field) : [...prev, Field]
     );
   };
-  const handleDocotrAvali = (avalaibility: string) => {
-    setDoctorAvali((prev) =>
-      prev.includes(avalaibility)
-        ? prev.filter((c) => c !== avalaibility)
-        : [...prev, avalaibility]
-    );
-  };
-  useEffect(() => {
-    const matchesDoctorFeild = (Doctor: { Field: string }) =>
-      doctorField.length === 0 || doctorField.includes(Doctor.Field);
-    const matchesDoctorAvali = (Doctor: { avalaibility: string }) =>
-      doctorAvali.length === 0 || doctorAvali.includes(Doctor.avalaibility);
 
-    const matcesDoctorName = (Doctor: { Name: string; Field: string }) =>
+  useEffect(() => {
+    const matchesDoctorFeild = (Doctor: { field?: string }) =>
+      doctorField.length === 0 || doctorField.includes(Doctor.field ?? "");
+
+    const matcesDoctorName = (Doctor: {
+      firstName: string;
+      field?: string;
+      lastName: string;
+    }) =>
       search.doctor === "" ||
-      Doctor.Name.toLowerCase().includes(search.doctor.toLowerCase()) ||
-      Doctor.Field.toLowerCase().includes(search.doctor.toLowerCase());
+      Doctor.firstName.toLowerCase().includes(search.doctor.toLowerCase()) ||
+      Doctor.lastName.toLowerCase().includes(search.doctor.toLowerCase()) ||
+      Doctor.field?.toLowerCase().includes(search.doctor.toLowerCase());
 
     const newFilteredDocotor = Doctor.slice().filter(
-      (Doctor) =>
-        matchesDoctorFeild(Doctor) &&
-        matcesDoctorName(Doctor) &&
-        matchesDoctorAvali(Doctor)
+      (Doctor) => matchesDoctorFeild(Doctor) && matcesDoctorName(Doctor)
     );
     setFilterdoctor(newFilteredDocotor);
     setCurrentPage(1);
-  }, [Doctor, doctorField, search, setCurrentPage, doctorAvali]);
+  }, [Doctor, doctorField, search, setCurrentPage]);
 
   return (
     <>
@@ -124,28 +117,6 @@ const UserDoctorsPage = () => {
               className=" capitalize font-semibold border px-5 rounded-md border-blue-300 text-blue-400 py-3 w-fit lg:hidden"
               onClick={() => setShowFilter(!showFilter)}
             />{" "}
-            {/* doctor avalaibility  */}
-            <div className={`${showFilter ? "" : 'max-lg:hidden mb-5"'} `}>
-              <h4 className="font-semibold whitespace-nowrap text-[13px] uppercase py-4">
-                Search by avalaibility{" "}
-              </h4>
-              <ul className="space-y-4 text-gray-600 text-sm">
-                {[
-                  ...new Set(
-                    filterdoctor && Doctor.map((doc) => doc.avalaibility)
-                  ),
-                ].map((item, i) => (
-                  <li key={i} className="flex gap-3 items-center capitalize">
-                    <input
-                      type="checkbox"
-                      onChange={() => handleDocotrAvali(item)}
-                      checked={doctorAvali.includes(item)}
-                    />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
             {/* category filter  */}
             <div className={`${showFilter ? "" : 'max-lg:hidden mb-5"'} `}>
               <h4 className="font-semibold whitespace-nowrap text-[13px] uppercase py-4">
@@ -153,7 +124,7 @@ const UserDoctorsPage = () => {
               </h4>
               <ul className="space-y-4 text-gray-600 text-sm">
                 {[
-                  ...new Set(filterdoctor && Doctor.map((doc) => doc.Field)),
+                  ...new Set(filterdoctor && Doctor.map((doc) => doc.field)),
                 ].map((item, i) => (
                   <li key={i} className="flex gap-3 items-center">
                     <input
@@ -182,12 +153,12 @@ const UserDoctorsPage = () => {
                   .map((item) => (
                     <DoctorCard
                       key={item._id}
-                      Field={item.Field}
-                      image={item.ProfilePic}
+                      Field={item.field}
+                      image={item.image}
                       id={item._id}
-                      name={item.Name}
+                      name={`${item.firstName} ${item.lastName}`}
                       hospitalName={item.Hospital_Name}
-                      state={item.AddressState}
+                      state={item.state}
                     />
                   ))}
               </div>

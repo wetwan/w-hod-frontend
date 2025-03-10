@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { NavLink, useNavigate } from "react-router";
 import { assets } from "../assets";
 import Button from "./Button";

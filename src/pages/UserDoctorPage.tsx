@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useContext, useEffect, useState } from "react";
 import { HospitalContext } from "../context/HospitalContext";
-import { Doctor } from "../types/type";
+
 import Button from "../components/Button";
 import HosDoc from "../components/HosDoc";
 import Review from "../components/Review";
@@ -16,27 +16,54 @@ import { FaGraduationCap } from "react-icons/fa6";
 import { GiLabCoat } from "react-icons/gi";
 import { toast } from "react-toastify";
 import { useClerk, useUser } from "@clerk/clerk-react";
-import { DoctorContext } from "../context/DoctorContext";
+import { DoctorContext, Doctors } from "../context/DoctorContext";
+
+import axios from "axios";
 const UserDoctorPage = () => {
   const { id } = useParams();
+
   const { openSignIn } = useClerk();
   const { name, setName, email, setMessage, message, setEmail } =
     useContext(HospitalContext);
 
-  const { Doctor } = useContext(DoctorContext);
+  const { Doctor, hosData, backendUrl } = useContext(DoctorContext);
 
-  const [docData, setDocData] = useState<Doctor | null>(null);
+  const [docData, setDocData] = useState<Doctors | null>(null);
 
   const navigate = useNavigate();
 
+  const useYear = () => {
+    if (!docData?.experience) return 0; // If no experience data, return 0
+
+    const startDate = new Date(docData.experience); // Convert the string date to a Date object
+    const currentYear = new Date().getFullYear();
+
+    const startYear = startDate.getFullYear(); // Extract the year from the experience date
+
+    return currentYear - startYear;
+  };
+
   const fetchDoc = async () => {
-    const data = Doctor.filter((doc) => doc._id === id);
-    if (data.length !== 0) {
-      setDocData(data[0]);
+    try {
+      const { data } = await axios.get(backendUrl + `/api/doctor/doctor/${id}`);
+      if (data.success) {
+        setDocData(data.doctor);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        toast.error(
+          error.response?.data?.message || "An unknown error occurred"
+        );
+      } else {
+        toast.error("An unknown error occurred");
+      }
     }
   };
+
   const relatedDoctors = Doctor.filter(
-    (doc) => docData?._id !== doc._id && docData?.Field === doc.Field
+    (doc) => docData?._id !== doc._id && docData?.field === doc.field
   ).slice(0, 5);
 
   useEffect(() => {
@@ -44,6 +71,7 @@ const UserDoctorPage = () => {
       fetchDoc();
     }
   }, [id, Doctor]);
+
   const handleReview = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email.trim()) {
@@ -66,7 +94,9 @@ const UserDoctorPage = () => {
       Doctor_id: docData?._id,
     };
 
-    toast.success(  "Review submitted successfully!");
+    console.log(data);
+
+    toast.success("Review submitted successfully!");
 
     setEmail("");
     setName("");
@@ -80,8 +110,8 @@ const UserDoctorPage = () => {
       <div className="mt-28 w-full p-3">
         <div className=" w-5/6 hidden  md:block h-[40vh] mx-auto">
           <img
-            src={docData?.picBanner}
-            className="w-full h-full"
+            src={docData?.bannerImage}
+            className="w-full h-full object-fill"
             alt="banner pic"
           />
         </div>
@@ -89,35 +119,33 @@ const UserDoctorPage = () => {
           <div className=" w-full lg:p-4 col-span-3 my-4 lg:my-0 ">
             <div className="px-4 flex items-center justify-between flex-col md:flex-row gap-5  py-3">
               <div
-                className={`relative border  rounded-full ${
-                  docData?.avalaibility === "online"
+                className={`relative border rounded-full ${
+                  docData?.available === true
                     ? "border-green-500"
-                    : " border-gray-500"
+                    : "border-gray-500"
                 }`}
               >
                 <div className=" rounded-full overflow-hidden  w-28 h-28">
                   <img
-                    src={docData?.ProfilePic}
+                    src={docData?.image}
                     className="w-full h-full object-cover"
                     alt="profile pic"
                   />
                 </div>{" "}
                 <div
-                  className={`z-50 absolute bottom-2 right-0 border p-3 rounded-full ${
-                    docData?.avalaibility === "online"
-                      ? "bg-green-500"
-                      : "bg-gray-500"
+                  className={`z-10 absolute bottom-2 right-0 border p-3 rounded-full ${
+                    docData?.available === true ? "bg-green-500" : "bg-gray-500"
                   }`}
                 ></div>
               </div>
 
               <div className="md:w-9/12 w-full ">
                 <p className="border-color px-3 uppercase py-2 w-full text-sm">
-                  {docData?.Name}
+                  {docData?.firstName} {docData?.lastName}
                 </p>
                 <div className="text-sm flex items-center justify-between gap-3 mt-4">
                   <p className="w-5/6 border-color px-3 capitalize py-2 whitespace-nowrap overflow-scroll ">
-                    {docData?.Hospital_Name}
+                    {hosData?.name}
                   </p>
                 </div>
               </div>
@@ -132,7 +160,7 @@ const UserDoctorPage = () => {
                     <CiMail className="text-green-700 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Email}
+                    {docData?.email}
                   </p>
                 </div>
                 <div className="flex my-1 p-1 md:my-0 w-full md:w-1/2 items-center gap-2">
@@ -140,7 +168,7 @@ const UserDoctorPage = () => {
                     <CgWebsite className="text-green-700 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Website}
+                    {docData?.website}
                   </p>
                 </div>
               </div>
@@ -150,7 +178,7 @@ const UserDoctorPage = () => {
                     <BiPhone className="text-green-700 w-5 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Phone}
+                    {docData?.phone}
                   </p>
                 </div>
               </div>
@@ -173,7 +201,7 @@ const UserDoctorPage = () => {
                     <BiCalendar className="text-green-700 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Experience}
+                    {useYear()}
                   </p>
                 </div>
               </div>
@@ -183,7 +211,7 @@ const UserDoctorPage = () => {
                     <GiLabCoat className="text-green-700 w-5 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Field}
+                    {docData?.field}
                   </p>
                 </div>
               </div>
@@ -221,7 +249,7 @@ const UserDoctorPage = () => {
               </h2>
 
               <p className=" border-color w-11/12 mx-auto capitalize px-3 py-2  text-sm leading-relaxed ">
-                {docData?.About}
+                {docData?.about}
               </p>
             </div>
 
@@ -286,8 +314,8 @@ const UserDoctorPage = () => {
                     <HosDoc
                       name={item.Name}
                       id={item._id}
-                      field={item.Field}
-                      image={item.ProfilePic}
+                      field={item.field}
+                      image={item.image}
                     />
                   </div>
                 ))}
@@ -298,7 +326,7 @@ const UserDoctorPage = () => {
               <h2 className="font-bold capitalize  mb-4 text-lg">
                 doctor reviwes
               </h2>
-              <div className="text-sm ">
+              {/* <div className="text-sm ">
                 {docData?.Review.map((item, i) => (
                   <Review
                     key={i}
@@ -307,7 +335,7 @@ const UserDoctorPage = () => {
                     email={item.email}
                   />
                 ))}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

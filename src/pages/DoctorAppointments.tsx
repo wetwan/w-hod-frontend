@@ -4,12 +4,24 @@ import Pagenation from "../components/Pagenation";
 import { HospitalContext } from "../context/HospitalContext";
 import { useNavigate } from "react-router";
 import moment from "moment";
+import { DoctorContext } from "../context/DoctorContext";
+import { HospitalInfoContext } from "../context/HospitalInfo";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const DoctorAppointments = () => {
   const navigate = useNavigate();
-  const { appointment, currentPage } = useContext(HospitalContext);
+
+  const { currentPage, backendUrl } = useContext(HospitalContext);
+
+  const { appointment, fetchAppointment } = useContext(HospitalInfoContext);
+  const { docData, docToken } = useContext(DoctorContext);
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const sortAppointments = appointment.sort((a, b) => {
+  const checkHospitalId = appointment.filter(
+    (appt) => appt.doctorId._id === docData?._id
+  );
+
+  const sortAppointments = checkHospitalId.sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
@@ -17,6 +29,26 @@ const DoctorAppointments = () => {
   const filteredAppointments = sortAppointments.filter((appt) =>
     selectedStatus === "all" ? true : appt.status === selectedStatus
   );
+
+  const ChnagAppointment = async (id: string, status: string) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/doctor/appointment-status",
+        {
+          id,
+          status,
+        },
+        { headers: { token: docToken } }
+      );
+      if (data.success) {
+        fetchAppointment();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <div className="p-5 w-full border h-full min-h-screen  bg-white md:rounded-lg">
@@ -61,30 +93,64 @@ const DoctorAppointments = () => {
                   >
                     <td className="py-3 px-4  max-md:hidden">
                       <img
-                        src={appt.doctor_image}
-                        alt={`Dr. ${appt.doctor}`}
+                        src={appt.userId.image}
+                        alt={`Dr. ${appt.userId.firstName}`}
                         className="w-12 h-12 rounded-full max-md:hidden"
                       />
                     </td>
                     <td className="text-lg font-semibold py-3 px-4 ">
-                      {appt.doctor}
+                      {appt.userId.firstName} {appt.userId.lastName}
                     </td>
                     <td className="text-sm py-3 px-4 ">
-                      {moment(appt.date).format("ll")}
+                      {moment(appt.slotDate).format("ll")}
                     </td>
                     <td className="text-sm py-3 px-4 ">
-                      {moment(appt.time, "HH:mm").format("hh:mm A")}
+                      {moment(appt.slotTime, "HH:mm").format("hh:mm A")}
                     </td>
-                    <td
-                      className={`text-lg font-semibold border mx-2  inline-block my-5 py-3 px-4 capitalize rounded-lg ${
-                        appt.status === "pending"
-                          ? "bg-yellow-100"
-                          : appt.status === "canceled"
-                          ? "bg-red-100"
-                          : "bg-green-100"
-                      }`}
-                    >
-                      {appt.status}
+                    <td className={`py-3 px-4  order relative `}>
+                      <div className="relative px-4 inline-block  text-left group">
+                        <button className="text-gray-500 action-button ">
+                          {appt.status}...
+                        </button>
+                        <div className="z-10 hidden absolute right-0 md:left-0 top-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow group-hover:block  ">
+                          <button
+                            onClick={() =>
+                              ChnagAppointment(appt._id, "Pending")
+                            }
+                            className="block font-bold w-full text-left px-4 py-3 text-yellow-300 hover:bg-yellow-100"
+                          >
+                            Pending
+                          </button>
+                          <button
+                            onClick={() =>
+                              ChnagAppointment(appt._id, "Cancelled")
+                            }
+                            className="block w-full text-left px-4 py-3 text-red-300 font-bold hover:bg-yellow-100"
+                          >
+                            Cancelled
+                          </button>
+                          <button
+                            onClick={() =>
+                              ChnagAppointment(appt._id, "Successful")
+                            }
+                            className="block w-full text-left px-4 py-3 text-green-300 font-bold hover:bg-yellow-100"
+                          >
+                            Successful
+                          </button>
+                        </div>
+                      </div>
+                      {/* <select
+                        name=""
+                        id=""
+                        value={appt.status}
+                        onChange={(e) => setChangeStatus(e.target.value)}
+                        className="bg-transparent   border-none outline-none w-full h-full"
+                        onClick={() => ChnagAppointment(appt._id, changeStatus)}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="canceled">Canceled</option>
+                        <option value="successful">Successful</option>
+                      </select> */}
                     </td>
                   </tr>
                 ))

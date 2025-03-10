@@ -1,8 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useContext } from "react";
 import { useNavigate } from "react-router";
 import { DoctorContext } from "../context/DoctorContext";
 import { BiUserCircle } from "react-icons/bi";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { HospitalInfoContext } from "../context/HospitalInfo";
 
 const AddDoctor = () => {
   const {
@@ -14,32 +16,97 @@ const AddDoctor = () => {
     setEmail,
     phone,
     setPhone,
-    school,
-    setSchool,
-
+    college,
+    setCollege,
     setExperience,
     website,
     setwebsite,
-    specialist,
-    setSpecialist,
-    bannerPic,
-    setBannerPic,
-    profilePic,
-    setProfilePic,
+    field,
+    setField,
+    bannerImage,
+    setBannerImage,
+    image,
+    setImage,
     about,
     setAbout,
+    backendUrl,
+    password,
+    setpassword,
+    state,
+    experience,
+    setState,
   } = useContext(DoctorContext);
+  const { hosToken } = useContext(HospitalInfoContext);
   const navigate = useNavigate();
 
-  const handleAddDoctor = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAddDoctor = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    navigate("/hospital-dashboard/profile");
-    scrollTo(0, 0);
+
+    const formData = new FormData();
+
+    // Append the form fields to FormData
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("phone", phone);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("state", state);
+    formData.append("website", website);
+    formData.append("College", college);
+    formData.append("experience", experience);
+    formData.append("about", about);
+    formData.append("field", field);
+
+    // Append the images (use conditional checks if required)
+    if (bannerImage) {
+      formData.append("bannerImage", bannerImage); // "bannerImage" should match backend field name
+    }
+
+    if (image) {
+      formData.append("image", image); // "image" should match backend field name
+    }
+
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/hospital/register",
+        formData, // Pass the FormData object
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Ensure proper content type
+            token: hosToken,
+          },
+        }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        navigate(`/hospital-dashboard/doctor`);
+        scrollTo(0, 0);
+        setAbout("");
+        setBannerImage(null);
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setState("");
+        setImage(null);
+        setwebsite("");
+        setCollege("");
+        setExperience("");
+        setAbout("");
+        setPhone("");
+        setpassword("");
+        setField("");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    }
   };
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = e.target.value ? new Date(e.target.value) : undefined;
-    setExperience(selectedDate);
-  };
+
   return (
     <div className="border min-h-screen border-green-500 rounded-md mt-2 mr-3 md:py-10 py-4 px-4">
       <h2 className="font-bold capitalize text-2xl clip "> add doctor</h2>
@@ -138,18 +205,18 @@ const AddDoctor = () => {
             <div className="flex gap-2 flex-col md:w-1/2 w-full">
               <label
                 className="md:px-3 capitalize font-semibold text-lg"
-                htmlFor="school"
+                htmlFor="college"
               >
-                School
+                College
               </label>
               <input
                 type="text"
                 required
                 className="border placeholder-shown:text-blue-800 placeholder:capitalize placeholder:text-blue-500 border-blue-300 py-4 px-4 rounded-md outline-none"
-                placeholder="school"
-                id="school"
-                value={school}
-                onChange={(e) => setSchool(e.target.value)}
+                placeholder="college"
+                id="college"
+                value={college}
+                onChange={(e) => setCollege(e.target.value)}
               />
             </div>
           </div>
@@ -157,18 +224,54 @@ const AddDoctor = () => {
             <div className="flex gap-2 flex-col md:w-1/2 w-full">
               <label
                 className="md:px-3 capitalize font-semibold text-lg"
-                htmlFor="specialist"
+                htmlFor="password"
               >
-                specialist
+                password
+              </label>
+              <input
+                type="password"
+                required
+                className="border placeholder-shown:text-blue-800 placeholder:capitalize placeholder:text-blue-500 border-blue-300 py-4 px-4 rounded-md outline-none"
+                placeholder="password"
+                id="password"
+                value={password}
+                onChange={(e) => setpassword(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 flex-col md:w-1/2 w-full">
+              <label
+                className="md:px-3 capitalize font-semibold text-lg"
+                htmlFor="state"
+              >
+                state
               </label>
               <input
                 type="text"
                 required
                 className="border placeholder-shown:text-blue-800 placeholder:capitalize placeholder:text-blue-500 border-blue-300 py-4 px-4 rounded-md outline-none"
-                placeholder="specialist"
-                id="specialist"
-                value={specialist}
-                onChange={(e) => setSpecialist(e.target.value)}
+                placeholder="state"
+                id="state"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className=" flex items-center max-md:flex-col gap-10 max-md:gap-3 md:mt-5">
+            <div className="flex gap-2 flex-col md:w-1/2 w-full">
+              <label
+                className="md:px-3 capitalize font-semibold text-lg"
+                htmlFor="field"
+              >
+                field
+              </label>
+              <input
+                type="text"
+                required
+                className="border placeholder-shown:text-blue-800 placeholder:capitalize placeholder:text-blue-500 border-blue-300 py-4 px-4 rounded-md outline-none"
+                placeholder="field"
+                id="field"
+                value={field}
+                onChange={(e) => setField(e.target.value)}
               />
             </div>
             <div className="flex gap-2 flex-col md:w-1/2 w-full">
@@ -184,7 +287,8 @@ const AddDoctor = () => {
                 className="border placeholder-shown:text-blue-800 placeholder:capitalize placeholder:text-blue-500 border-blue-300 py-4 px-4 rounded-md outline-none"
                 placeholder="years of experience"
                 id="experience"
-                onChange={handleDateChange}
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
               />
             </div>
           </div>
@@ -197,15 +301,15 @@ const AddDoctor = () => {
                 profile Pic
               </label>
               <div className="flex items-center gap-4">
-                <div className="  w-2/6 py-4 flex items-center justify-center">
-                  {profilePic ? (
+                <div className=" w-14 h-14 flex items-center justify-center">
+                  {image ? (
                     <img
-                      src={URL.createObjectURL(profilePic)}
+                      src={URL.createObjectURL(image)}
                       alt="hospital image"
-                      className="rounded-full w-full h-full object-cover"
+                      className="rounded-full w-full h-full object-cover  border border-green-500"
                     />
                   ) : (
-                    <BiUserCircle className="xl w-full h-full" />
+                    <BiUserCircle className="text-xl w-14 h-14  text-gray-500" />
                   )}
                 </div>
                 <input
@@ -215,7 +319,7 @@ const AddDoctor = () => {
                   className="border placeholder-shown:text-blue-800 placeholder:capitalize placeholder:text-blue-500 border-blue-300 py-4 px-4 rounded-md outline-none"
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
-                      setProfilePic(e.target.files[0]);
+                      setImage(e.target.files[0]);
                     }
                   }}
                 />
@@ -229,15 +333,15 @@ const AddDoctor = () => {
                 banner Pic
               </label>
               <div className="flex items-center gap-4">
-                <div className="  w-2/6 py-4 flex items-center justify-center">
-                  {bannerPic ? (
+                <div className=" w-14 h-14 flex items-center justify-center">
+                  {bannerImage ? (
                     <img
-                      src={URL.createObjectURL(bannerPic)}
+                      src={URL.createObjectURL(bannerImage)}
                       alt="hospital image"
-                      className="rounded-full w-full h-full object-cover"
+                      className="rounded-full w-full h-full object-cover  border border-green-500"
                     />
                   ) : (
-                    <BiUserCircle className="xl w-full h-full" />
+                    <BiUserCircle className="text-xl w-14 h-14  text-gray-500" />
                   )}
                 </div>
                 <input
@@ -247,7 +351,7 @@ const AddDoctor = () => {
                   className="border placeholder-shown:text-blue-800 placeholder:capitalize placeholder:text-blue-500 border-blue-300 py-4 px-4 rounded-md outline-none"
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
-                      setBannerPic(e.target.files[0]);
+                      setBannerImage(e.target.files[0]);
                     }
                   }}
                 />

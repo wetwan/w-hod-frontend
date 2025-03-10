@@ -26,9 +26,7 @@ const HospitalCard = ({ name, state, id, image }: Props) => {
         </h4>
         <div className=" flex items-center justify-between  py-2">
           <span className="capitalize font-medium  text-base">{state}</span>
-          <p className=" px-4 py-1.5 bg-white border rounded-md text-green-600 shadow-sm ">
-            12.00 miles
-          </p>
+         
         </div>
       </div>
     </div>

@@ -1,22 +1,24 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useUser } from "@clerk/clerk-react";
 import { useParams } from "react-router";
 import Navbar from "../components/Navbar";
 import { useContext, useEffect, useState } from "react";
-import { HospitalContext } from "../context/HospitalContext";
-import { Appointment, AppointmentData } from "../types/type";
+import {
+  AppointmentDetail,
+  Appointments,
+  HospitalContext,
+} from "../context/HospitalContext";
+
 import Footer from "../components/Footer";
+import moment from "moment";
 
 const UserMyAppointment = () => {
   const { id } = useParams();
-  const { appointment, AppointmentData, weight,height, phoneNumber,gender } =
+  const { appointment, appointmentDetails, userData } =
     useContext(HospitalContext);
 
-  const { user } = useUser();
-
-  const [appBio, setAppBio] = useState<Appointment | null>(null);
-  const [appData, setAppData] = useState<AppointmentData | null>(null);
+  const [appBio, setAppBio] = useState<Appointments | null>(null);
+  const [appData, setAppData] = useState<AppointmentDetail | null>(null);
   const fecthAppointment = async () => {
     const data = appointment.filter((app) => app._id === id);
     if (data.length !== 0) {
@@ -26,8 +28,8 @@ const UserMyAppointment = () => {
   const fetchBio = async () => {
     if (!appBio) return;
 
-    const data = AppointmentData.find(
-      (app) => app.appointments_id === appBio._id
+    const data = appointmentDetails.find(
+      (app) => app.appointmentID._id === appBio._id
     );
     if (data) {
       setAppData(data);
@@ -39,10 +41,10 @@ const UserMyAppointment = () => {
     }
   }, [id, appointment]);
   useEffect(() => {
-    if (appBio && AppointmentData.length > 0) {
+    if (appBio && appointmentDetails.length > 0) {
       fetchBio();
     }
-  }, [appBio, AppointmentData]);
+  }, [appBio, appointmentDetails]);
   return (
     <div>
       <Navbar />
@@ -51,97 +53,95 @@ const UserMyAppointment = () => {
           <div className="container border mx-auto md:px-4 md:py-5 bg px-10 py-10  rounded-lg md:flex-row flex-col flex items-start lg:gap-10 justify-around ">
             <div className="w-32  h-32 mt-5 rounded-full overflow-hidden">
               <img
-                src={user?.imageUrl}
+                src={userData?.image}
                 alt="profile image"
                 className="w-full h-full"
               />
             </div>
             <div className="mt-5">
               <h5 className="text-2xl font-semibold capitalize">
-                {user?.fullName}
+                {userData?.firstName} {userData?.lastName}
               </h5>
-              <p className="text-gray-500 capitalize">
+              <p className="text-white capitalize">
                 <span className="text-black mr-3 font-semibold"> gender:</span>{" "}
-                {gender}
+                {userData?.gender}
               </p>
-              <p className="text-gray-500 capitalize">
+              <p className="text-white capitalize">
                 {" "}
                 <span className="text-black mr-3 font-semibold"> weight:</span>
-                {weight}
+                {userData?.weight} kg
               </p>
-              <p className="text-gray-500 capitalize">
+              <p className="text-white capitalize">
                 {" "}
                 <span className="text-black mr-3 font-semibold"> height:</span>
-                {height}
+                {userData?.height} cm
               </p>
-              <p className="text-gray-500 capitalize">
+              <p className="text-white capitalize">
                 {" "}
                 <span className="text-black mr-3 font-semibold"> email:</span>
-                {user?.emailAddresses[0].emailAddress}
+                {userData?.email}
               </p>
-              <p className="text-gray-500 capitalize">
+              <p className="text-white capitalize">
                 {" "}
                 <span className="text-black mr-3 font-semibold">
                   {" "}
                   phone:
                 </span>{" "}
-                {phoneNumber}
+                {userData?.phone}
               </p>
             </div>
             <div className="mt-5">
               <h5 className="text-xl font-semibold capitalize">
-                {appBio?.doctor}
+                {appBio?.doctorId.firstName} {appBio?.doctorId.lastName}
               </h5>
-              <p className="text-gray-500 capitalize">
-                {appBio?.hospistal_name}
-              </p>
+              <p className="text-white capitalize">{appBio?.hospitalId.name}</p>
             </div>
             <div className=" mt-5 sm:mx-10">
-              <button className="px-4 py-2 border capitalize font-bold rounded-lg border-color mb-5">
+              <button className="px-4 py-3 border capitalize font-bold rounded-lg border-color mb-5">
                 {" "}
                 {appBio?.status}
               </button>
-              <p className="text-gray-500 capitalize">
+              <p className="text-white capitalize">
                 {" "}
                 <span className="text-black mr-3 font-semibold">
                   {" "}
                   date:
                 </span>{" "}
-                {appBio?.date}
+                {moment(appBio?.slotDate, "D-M-YYYY").format("ll")}
               </p>
-              <p className="text-gray-500 capitalize">
+              <p className="text-white capitalize">
                 {" "}
                 <span className="text-black mr-3 font-semibold">
                   {" "}
                   time:
                 </span>{" "}
-                {appBio?.time}
+                {moment(appBio?.slotTime, "hh:mm A").format("hh:mm A")}
               </p>
             </div>
           </div>
-          {appBio?.status === "canceled" && (
+          {appBio?.status === "Canceled" && (
             <div className="md:w-5/6 mx-auto w-full">
               <p className="w-5/6 py-10 text-center mx-auto capitalize font-bold text-2xl  text-red-600">
                 {" "}
                 this appointment was cancelled
               </p>
               <div className="">
-                <h5 className="text-gray-500 mt-5 font-semibold">
+                <h5 className="text-white mt-5 font-semibold">
                   Reason for cancelation
                 </h5>
-                <p className="md:w-4/6 mt-5 border-color px-3 py-2">
+                {/* <p className="md:w-4/6 mt-5 border-color px-3 py-3">
                   {appData?.reasonforcancelation}
-                </p>
+                </p> */}
               </div>
             </div>
           )}
-          {appBio?.status === "pending" && (
+          {appBio?.status === "Pending" && (
             <p className="w-5/6 py-10 text-center mx-auto capitalize font-bold text-2xl text-yellow-600">
               {" "}
               this appointment is pending
             </p>
           )}
-          {appBio?.status === "successful" && (
+          {appBio?.status === "Successful" && (
             <div className="container rounded-xl py-5 px-4 border mx-auto mt-10 ">
               <h2 className="capitalize text-3xl font-extrabold ">
                 {" "}
@@ -149,34 +149,32 @@ const UserMyAppointment = () => {
               </h2>
               <div className="container mx-auto mt-3 px-3">
                 <div className="">
-                  <h5 className="text-gray-500 mt-5 font-semibold">
+                  <h5 className="text-white mt-5 font-semibold">
                     Reason for visit
                   </h5>
-                  <p className="md:w-4/6 mt-5 border-color px-3 py-2">
-                    {appData?.reasonForVisit}
+                  <p className="md:w-4/6 mt-5 border-color px-3 py-3">
+                    {appData?.reason}
                   </p>
                 </div>
                 <div className="">
-                  <h5 className="text-gray-500 mt-5 font-semibold">
+                  <h5 className="text-white mt-5 font-semibold">
                     Medical history
                   </h5>
-                  <p className="md:w-4/6 mt-5 border-color px-3 py-2">
-                    {appData?.medicalHistory}
+                  <p className="md:w-4/6 mt-5 border-color px-3 py-3">
+                    {appData?.history}
                   </p>
                 </div>
                 <div className="">
-                  <h5 className="text-gray-500 mt-5 font-semibold">
-                    Vital signs
-                  </h5>
+                  <h5 className="text-white mt-5 font-semibold">Vital signs</h5>
                   <div className=" md:px-10 mt-3 flex md:items-center gap-5 md:flex-row flex-col">
                     <div className="">
                       <h6 className="text-gray-900 font-semibold text-lg">
                         {" "}
                         Body temperature
                       </h6>
-                      <p className="border-color px-3 py-2 mt-2">
+                      <p className="border-color px-3 py-3 mt-2">
                         {" "}
-                        {appData?.vitalSigns?.bodyTemperature}
+                        {appData?.temperature}
                       </p>
                     </div>
                     <div className="">
@@ -184,9 +182,9 @@ const UserMyAppointment = () => {
                         {" "}
                         Pulse rate
                       </h6>
-                      <p className="border-color px-3 py-2 mt-2">
+                      <p className="border-color px-3 py-3 mt-2">
                         {" "}
-                        {appData?.vitalSigns?.pulseRate}{" "}
+                        {appData?.pulse}{" "}
                       </p>
                     </div>
                     <div className="">
@@ -194,9 +192,9 @@ const UserMyAppointment = () => {
                         {" "}
                         Respiration rate{" "}
                       </h6>
-                      <p className="border-color px-3 py-2 mt-2">
+                      <p className="border-color px-3 py-3 mt-2">
                         {" "}
-                        {appData?.vitalSigns?.respirationRate}
+                        {appData?.respiration}
                       </p>
                     </div>
                     <div className="">
@@ -204,35 +202,35 @@ const UserMyAppointment = () => {
                         {" "}
                         blood preesure rate{" "}
                       </h6>
-                      <p className="border-color px-3 py-2 mt-2">
+                      <p className="border-color px-3 py-3 mt-2">
                         {" "}
-                        {appData?.vitalSigns?.bloodPressure}
+                        {appData?.blood_pressure}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="">
-                  <h5 className="text-gray-500 mt-5 font-semibold">
+                  <h5 className="text-white mt-5 font-semibold">
                     Doctor Diagnosis
                   </h5>
-                  <p className="md:w-4/6 mt-5 border-color px-3 py-2">
-                    {appData?.doctorDiagnosis}
+                  <p className="md:w-4/6 mt-5 border-color px-3 py-3">
+                    {appData?.diagnosis}
                   </p>
                 </div>
                 <div className="">
-                  <h5 className="text-gray-500 mt-5 font-semibold">
+                  <h5 className="text-white mt-5 font-semibold">
                     Doctor prebscription
                   </h5>
-                  <p className="md:w-4/6 mt-5 border-color px-3 py-2">
-                    {appData?.doctorPrescription}
+                  <p className="md:w-4/6 mt-5 border-color px-3 py-3">
+                    {appData?.prescriptions}
                   </p>
                 </div>
                 <div className="">
-                  <h5 className="text-gray-500 mt-5 font-semibold">
+                  <h5 className="text-white mt-5 font-semibold">
                     Doctor signature
                   </h5>
                   <p className="w-fit mt-5 border-color px-10 py-4">
-                    {appBio?.doctor}
+                    {appBio?.doctorId.firstName} {appBio?.doctorId.lastName}
                   </p>
                 </div>
               </div>

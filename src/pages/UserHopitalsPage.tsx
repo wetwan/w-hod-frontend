@@ -45,38 +45,32 @@ const UserHopitalsPage = () => {
         : [...prev, ownership]
     );
   };
-  const handleHospitalState = (AddressState: string) => {
+  const handleHospitalState = (state: string) => {
     setHospitalstate((prev) =>
-      prev.includes(AddressState)
-        ? prev.filter((c) => c !== AddressState)
-        : [...prev, AddressState]
+      prev.includes(state) ? prev.filter((c) => c !== state) : [...prev, state]
     );
   };
   useEffect(() => {
     const matchesHospitalOwnership = (Hospital: { ownership: string }) =>
       hospitalOwnership.length === 0 ||
       hospitalOwnership.includes(Hospital.ownership);
-    const matchesHospitalType = (Hospital: { Type: string }) =>
+    const matchesHospitalType = (Hospital: { type: string }) =>
       selectedHospitalType.length === 0 ||
-      selectedHospitalType.includes(Hospital.Type);
+      selectedHospitalType.includes(Hospital.type);
+    const matchesHospitalState = (Hospital: { state: string }) =>
+      hospitalstate.length === 0 || hospitalstate.includes(Hospital.state);
 
-    const matcesHospitalName = (Hospital: {
-      Hospital_Name: string;
-      AddressState: string;
-    }) =>
+    const matcesHospitalName = (Hospital: { name: string; state: string }) =>
       search.hospital === "" ||
-      Hospital.Hospital_Name.toLowerCase().includes(
-        search.hospital.toLowerCase()
-      ) ||
-      Hospital.AddressState.toLowerCase().includes(
-        search.hospital.toLowerCase()
-      );
+      Hospital.name.toLowerCase().includes(search.hospital.toLowerCase()) ||
+      Hospital.state.toLowerCase().includes(search.hospital.toLowerCase());
 
     const newFilteredHospiatl = Hospital.slice().filter(
       (Hospital) =>
         matchesHospitalOwnership(Hospital) &&
         matcesHospitalName(Hospital) &&
-        matchesHospitalType(Hospital)
+        matchesHospitalType(Hospital) &&
+        matchesHospitalState(Hospital)
     );
     setFilterHospital(newFilteredHospiatl);
     setCurrentPage(1);
@@ -86,6 +80,7 @@ const UserHopitalsPage = () => {
     hospitalOwnership,
     setCurrentPage,
     selectedHospitalType,
+    hospitalstate,
   ]);
 
   return (
@@ -164,7 +159,7 @@ const UserHopitalsPage = () => {
               </h4>
               <ul className="space-y-4 text-gray-600 ">
                 {[
-                  ...new Set(filterHospital && Hospital.map((hos) => hos.Type)),
+                  ...new Set(filterHospital && Hospital.map((hos) => hos.type)),
                 ].map((item, i) => (
                   <li key={i} className="flex gap-3 items-center">
                     <input
@@ -185,7 +180,7 @@ const UserHopitalsPage = () => {
               <ul className="space-y-4 text-gray-600 ">
                 {[
                   ...new Set(
-                    filterHospital && Hospital.map((hos) => hos.AddressState)
+                    filterHospital && Hospital.map((hos) => hos.state)
                   ),
                 ]
                   .slice(0, 5)
@@ -242,9 +237,9 @@ const UserHopitalsPage = () => {
                     <HospitalCard
                       key={item._id}
                       id={item._id}
-                      image={item.ProfilePic}
-                      name={item.Hospital_Name}
-                      state={item.AddressState}
+                      image={item.image}
+                      name={item.name}
+                      state={item.state}
                     />
                   ))}
               </div>

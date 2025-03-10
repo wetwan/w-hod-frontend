@@ -1,16 +1,25 @@
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router";
-import { HospitalContext } from "../context/HospitalContext";
+import {  useNavigate } from "react-router";
+import {  HospitalContext } from "../context/HospitalContext";
 import Pagenation from "../components/Pagenation";
 import moment from "moment";
+import { HospitalInfoContext } from "../context/HospitalInfo";
 
 const HospitalAppointments = () => {
   const navigate = useNavigate();
-  const { appointment, currentPage } = useContext(HospitalContext);
+  const { currentPage } = useContext(HospitalContext);
+  const { appointment,hosData } = useContext(HospitalInfoContext);
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const sortAppointments = appointment.sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
+  // const [appointments, setAppointments] = useState<Appointments>();
+
+  const checkHospitalId = appointment.filter(
+    (appt) => appt.hospitalId._id === hosData?._id
+  );
+
+  const sortAppointments =
+  checkHospitalId.sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    }) || [];
 
   // Filter Appointments Based on Status
   const filteredAppointments = sortAppointments.filter((appt) =>
@@ -28,9 +37,9 @@ const HospitalAppointments = () => {
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
             <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="canceled">Canceled</option>
-            <option value="successful">Successful</option>
+            <option value="Pending">Pending</option>
+            <option value="Canceled">Canceled</option>
+            <option value="Successful">Successful</option>
           </select>
         </div>
 
@@ -39,6 +48,7 @@ const HospitalAppointments = () => {
             <tr className="capitalize w-full">
               <th className="py-3 px-4  text-left max-md:hidden">Image</th>
               <th className="py-3 px-4  text-left">Patient</th>
+              <th className="py-3 px-4  text-left">Doctor</th>
               <th className="py-3 px-4  text-left">Date</th>
               <th className="py-3 px-4  text-left">Time</th>
               <th className="py-3 px-4  text-left">Status</th>
@@ -60,19 +70,22 @@ const HospitalAppointments = () => {
                   >
                     <td className="py-3 px-4  max-md:hidden">
                       <img
-                        src={appt.doctor_image}
-                        alt={`Dr. ${appt.doctor}`}
+                        src={appt?.userId?.image}
+                        alt={`Dr. ${appt?.userId?.firstName}`}
                         className="w-12 h-12 rounded-full max-md:hidden"
                       />
                     </td>
-                    <td className="text-lg font-semibold py-3 px-4 ">
-                      {appt.doctor}
+                    <td className="text-lg font-medium py-3 px-4 capitalize">
+                      {appt?.userId?.firstName} {appt?.userId?.lastName}
+                    </td>
+                    <td className="text-lg font-medium py-3 px-4 capitalize">
+                      {appt?.doctorId?.firstName} {appt?.doctorId?.lastName}
                     </td>
                     <td className="text-sm py-3 px-4 ">
-                      {moment(appt.date).format("ll")}
+                      {moment(appt.slotDate).format("ll")}
                     </td>
                     <td className="text-sm py-3 px-4 ">
-                      {moment(appt.time, "HH:mm").format("hh:mm A")}
+                      {moment(appt.slotTime, "HH:mm").format("hh:mm A")}
                     </td>
                     <td
                       className={`text-lg font-semibold border mx-2  inline-block my-5 py-3 px-4 capitalize rounded-lg ${

@@ -1,90 +1,63 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useNavigate, useParams } from "react-router";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import { useParams } from "react-router";
 import { useContext, useEffect, useState } from "react";
 import { HospitalContext } from "../context/HospitalContext";
-import { Doctor } from "../types/type";
-import Button from "../components/Button";
-import HosDoc from "../components/HosDoc";
+import { Doctors } from "../context/DoctorContext";
 import Review from "../components/Review";
 import { CiMail } from "react-icons/ci";
 import { CgWebsite } from "react-icons/cg";
 import { BiCalendar, BiPhone } from "react-icons/bi";
 import { FaGraduationCap } from "react-icons/fa6";
 import { GiLabCoat } from "react-icons/gi";
-import { toast } from "react-toastify";
-import { useClerk, useUser } from "@clerk/clerk-react";
 import { DoctorContext } from "../context/DoctorContext";
+import { HospitalInfoContext } from "../context/HospitalInfo";
+
 const HospitalDoctor = () => {
   const { id } = useParams();
-  const { openSignIn } = useClerk();
-  const { name, setName, email, setMessage, message, setEmail } =
-    useContext(HospitalContext);
+  const { hosData, doctors } = useContext(HospitalInfoContext);
 
-  const { Doctor } = useContext(DoctorContext);
+  const findHospiatl = async () => {
+    doctors.filter((doc) => hosData?._id === doc.hospitatId);
+  };
 
-  const [docData, setDocData] = useState<Doctor | null>(null);
+  const [docData, setDocData] = useState<Doctors | null>(null);
+  const getYear = () => {
+    if (!docData?.experience) return 0; // If no experience data, return 0
 
-  const navigate = useNavigate();
+    const startDate = new Date(docData.experience); // Convert the string date to a Date object
+    const currentYear = new Date().getFullYear();
+
+    const startYear = startDate.getFullYear(); // Extract the year from the experience date
+
+    return currentYear - startYear;
+  };
 
   const fetchDoc = async () => {
-    const data = Doctor.filter((doc) => doc._id === id);
+    const data = doctors.filter((doc) => doc._id === id);
     if (data.length !== 0) {
       setDocData(data[0]);
     }
   };
-  const relatedDoctors = Doctor.filter(
-    (doc) => docData?._id !== doc._id && docData?.Field === doc.Field
-  ).slice(0, 5);
 
   useEffect(() => {
-    if (Doctor.length > 0) {
+    if (doctors.length > 0) {
       fetchDoc();
     }
-  }, [id, Doctor]);
-  const handleReview = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast.error("Please input your email");
-      return;
-    }
-    if (!name.trim()) {
-      toast.error("Please input your name");
-      return;
-    }
-    if (!message.trim()) {
-      toast.error("Please input your review");
-      return;
-    }
+    findHospiatl();
+  }, [id, doctors]);
 
-    const data = {
-      name,
-      email,
-      message,
-      Doctor_id: docData?._id,
-    };
-
-    toast.success("Review submitted successfully!");
-
-    setEmail("");
-    setName("");
-    setMessage("");
-  };
 
   return (
     <>
       <div
         className={`${
-          docData?.avalaibility === "online"
-            ? "border-green-300"
-            : "border-gray-300"
+          docData?.available === true ? "border-green-300" : "border-gray-300"
         } mt-2 rounded-md border`}
       >
         <div className=" hidden  md:block h-[40vh] mx-auto">
           <img
-            src={docData?.picBanner}
+            src={docData?.bannerImage}
             className="w-full h-full"
             alt="banner pic"
           />
@@ -94,34 +67,32 @@ const HospitalDoctor = () => {
             <div className="px-4 flex items-center justify-between flex-col md:flex-row gap-5  py-3">
               <div
                 className={`relative border  rounded-full ${
-                  docData?.avalaibility === "online"
+                  docData?.available === true
                     ? "border-green-500"
                     : " border-gray-500"
                 }`}
               >
                 <div className=" rounded-full overflow-hidden  w-28 h-28">
                   <img
-                    src={docData?.ProfilePic}
+                    src={docData?.image}
                     className="w-full h-full object-cover"
                     alt="profile pic"
                   />
                 </div>{" "}
                 <div
                   className={`z-50 absolute bottom-2 right-0 border p-3 rounded-full ${
-                    docData?.avalaibility === "online"
-                      ? "bg-green-500"
-                      : "bg-gray-500"
+                    docData?.available === true ? "bg-green-500" : "bg-gray-500"
                   }`}
                 ></div>
               </div>
 
               <div className="md:w-9/12 w-full ">
                 <p className="border-color px-3 uppercase py-2 w-full text-sm">
-                  {docData?.Name}
+                  {docData?.firstName} {docData?.lastName}
                 </p>
                 <div className="text-sm flex items-center justify-between gap-3 mt-4">
                   <p className="w-5/6 border-color px-3 capitalize py-2 whitespace-nowrap overflow-scroll ">
-                    {docData?.Hospital_Name}
+                    {hosData?.name}
                   </p>
                 </div>
               </div>
@@ -136,7 +107,7 @@ const HospitalDoctor = () => {
                     <CiMail className="text-green-700 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Email}
+                    {docData?.email}
                   </p>
                 </div>
                 <div className="flex my-1 p-1 md:my-0 w-full md:w-1/2 items-center gap-2">
@@ -144,7 +115,7 @@ const HospitalDoctor = () => {
                     <CgWebsite className="text-green-700 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Website}
+                    {docData?.website}
                   </p>
                 </div>
               </div>
@@ -154,7 +125,7 @@ const HospitalDoctor = () => {
                     <BiPhone className="text-green-700 w-5 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Phone}
+                    {docData?.phone}
                   </p>
                 </div>
               </div>
@@ -177,7 +148,7 @@ const HospitalDoctor = () => {
                     <BiCalendar className="text-green-700 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Experience}
+                    {getYear()}
                   </p>
                 </div>
               </div>
@@ -187,7 +158,7 @@ const HospitalDoctor = () => {
                     <GiLabCoat className="text-green-700 w-5 text-xl text-center" />
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
-                    {docData?.Field}
+                    {docData?.field}
                   </p>
                 </div>
               </div>
@@ -199,12 +170,12 @@ const HospitalDoctor = () => {
               </h2>
 
               <p className=" border-color w-11/12 mx-auto capitalize px-3 py-2  text-sm leading-relaxed ">
-                {docData?.About}
+                {docData?.about}
               </p>
             </div>
           </div>
           <div className="lg:border flex flex-col-reverse lg:block rounded-lg w-full lg:p-4 col-span-2 md:mt-0">
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <h2 className="font-bold capitalize  mb-4 text-lg">
                 doctor reviwes
               </h2>
@@ -218,7 +189,7 @@ const HospitalDoctor = () => {
                   />
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

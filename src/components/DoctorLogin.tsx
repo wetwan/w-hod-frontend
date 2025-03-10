@@ -5,16 +5,47 @@ import { MdEmail } from "react-icons/md";
 import { CgLockUnlock } from "react-icons/cg";
 import { FaX } from "react-icons/fa6";
 import { useNavigate } from "react-router";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const DoctorLogin = () => {
-  const { email, setEmail, password, setpassword, setShowDoctorLogin } =
-    useContext(DoctorContext);
-  const naviagte = useNavigate();
+  const {
+    email,
+    setEmail,
+    password,
+    setpassword,
+    setShowDoctorLogin,
+    backendUrl,
+    setDocData,
+    setDocToken,
+  } = useContext(DoctorContext);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    naviagte("/doctor-dashboard/appointment");
-    setShowDoctorLogin(false)
+    try {
+      const { data } = await axios.post(backendUrl + "/api/doctor/login", {
+        email,
+        password,
+      });
+      if (data.success) {
+        setDocData(data.doctor);
+        setDocToken(data.token);
+        localStorage.setItem("doctor token", data.token);
+        console.log(data.token);
+        setShowDoctorLogin(false);
+        navigate("/doctor-dashboard/appointment");
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    }
   };
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -24,7 +55,7 @@ const DoctorLogin = () => {
   }, []);
 
   return (
-    <div className="fixed w-full top-0 right-0 bottom-0 left-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[9999999999999]">
+    <div className="absolute  w-full top-0 z-[100]  right-0 bottom-0 left-0 bg-black/30 backdrop-blur-sm flex items-center justify-center ">
       <form
         className="relative bg-white p-10 rounded-xl text-slate-500 md:w-[500px] flex items-center flex-col"
         onSubmit={handleSubmit}

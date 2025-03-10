@@ -1,45 +1,105 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useContext, useEffect, useState } from "react";
 import { HospitalInfoContext } from "../context/HospitalInfo";
-
 import { FaHospital, FaX } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { CgLockUnlock } from "react-icons/cg";
-
 import { BiUserCircle } from "react-icons/bi";
 import { useNavigate } from "react-router";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const HospitalLogin = () => {
   const {
     email,
-    hospistalName,
+
     setEmail,
-    sethospistalName,
+
     password,
+    name,
+    setName,
     setpassword,
     setShowHospitalLogin,
     image,
     setImage,
+    backendUrl,
+    setHosToken,
+    setHosData,
   } = useContext(HospitalInfoContext);
+
   const [State, setState] = useState("login");
   const [isNext, setIsNext] = useState(false);
-  const naviagte = useNavigate();
+
+  const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (State == "sign up" && !isNext) {
-      setIsNext(true);
-      
-    }naviagte("/hospital-dashboard/appointment");
-      setShowHospitalLogin(false)
+      return setIsNext(true);
+    }
+
+    try {
+      if (State === "login") {
+        const { data } = await axios.post(backendUrl + "/api/hospital/login", {
+          email,
+          password,
+        });
+        if (data.success) {
+          setHosData(data.hospiatal);
+          setHosToken(data.token);
+          localStorage.setItem("hospital token", data.token);
+          setShowHospitalLogin(false);
+          navigate("/hospital-dashboard/appointment");
+          toast.success(data.message);
+        } else {
+          toast.error(data.message);
+        }
+      } else {
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("password", password);
+        formData.append("email", email);
+
+        if (image) {
+          formData.append("image", image);
+        }
+
+        const response = await axios.post(
+          backendUrl + "/api/hospital/hospital-register",
+          formData
+        );
+
+        const { data } = response;
+
+        if (data.success) {
+          setHosData(data.hospiatal);
+          setHosToken(data.token);
+          localStorage.setItem("hospital token", data.token);
+          setShowHospitalLogin(false);
+          navigate("/hospital-dashboard/profile/edit");
+          toast.success(data.message);
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    }
   };
+
   useEffect(() => {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "unset";
-      };
-    }, []);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
   return (
-    <div className="fixed w-full top-0 right-0 bottom-0 left-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[9999999999999]">
+    <div className="absolute  w-full z-[100] top-0 right-0 bottom-0 left-0 bg-black/30 backdrop-blur-sm flex items-center justify-center ">
       <form
         className="relative bg-white p-10 rounded-xl text-slate-500 md:w-[500px]"
         onSubmit={handleSubmit}
@@ -98,10 +158,10 @@ const HospitalLogin = () => {
                 <input
                   type="text"
                   id="name"
-                  value={hospistalName}
+                  value={name}
                   required
                   placeholder="hospiatal name"
-                  onChange={(e) => sethospistalName(e.target.value)}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-5/6 text-sm h-full py-3 px-0.5 outline-none placeholder-shown:capitalize clip placeholder-shown:text-blue-400"
                 />
               </div>

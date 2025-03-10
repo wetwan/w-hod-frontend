@@ -5,7 +5,6 @@ import DoctorCard from "../components/DoctorCard";
 import Button from "../components/Button";
 import { useNavigate } from "react-router";
 import { useContext } from "react";
-
 import Subcribtion from "../components/Subcribtion";
 import Footer from "../components/Footer";
 import { DoctorContext } from "../context/DoctorContext";
@@ -15,6 +14,7 @@ const Home = () => {
   const naviagte = useNavigate();
 
   const { Doctor } = useContext(DoctorContext);
+
   const { Hospital } = useContext(HospitalInfoContext);
 
   return (
@@ -31,13 +31,13 @@ const Home = () => {
               </h3>
               <p className=" px-4 sm:px-0"> Find the hopital nearest to you </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  px-2 py-5 sm:gap-5 lg:gap-2">
-                {Hospital.slice(0, 8).map((item) => (
+                {Hospital.map((item) => (
                   <HospitalCard
                     key={item._id}
                     id={item._id}
-                    image={item.ProfilePic}
-                    name={item.Hospital_Name}
-                    state={item.AddressState}
+                    image={item.image}
+                    name={item.name}
+                    state={item.state}
                   />
                 ))}
               </div>
@@ -54,22 +54,21 @@ const Home = () => {
               </h3>
               <p className="px-4 sm:px-0"> Find the doctor nearest to you </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 px-2 py-5 sm:gap-5 lg:gap-2">
-                {Doctor.slice(0, 8).map((item) => (
+                {Doctor.map((item) => (
                   <DoctorCard
                     key={item._id}
-                    Field={item.Field}
-                    image={item.ProfilePic}
+                    Field={item.field}
+                    image={item.image}
                     id={item._id}
-                    name={item.Name}
-                    hospitalName={item.Hospital_Name}
-                    state={item.AddressState}
+                    name={`${item?.firstName} ${item.lastName}`}
+                    state={item.state}
                   />
                 ))}
               </div>
               <Button
                 text="More Doctors"
                 className="lg:w-1/5 w-3/4  rounded-md mt-4 mx-auto bg-blue-600 px-5 py-3 text-center font-bold text-white"
-                onClick={() => naviagte("/hospital")}
+                onClick={() => naviagte("/doctor")}
               />
             </div>
             <div className="w-full px-4 text-gray-800 mt-5">

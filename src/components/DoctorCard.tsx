@@ -2,9 +2,9 @@ import { useNavigate } from "react-router";
 
 type Props = {
   name: string;
-  state: string;
+  state?: string;
   id: string;
-  hospitalName: string;
+  hospitalName?: string;
   image: string;
   Field: string;
 };
@@ -22,7 +22,7 @@ const DoctorCard = ({ name, Field, state, hospitalName, image, id }: Props) => {
         <img src={image} className="w-full h-full" alt="doctor img" />
       </div>
       <div className="px-3">
-        <h3 className="mt-5 font-semibold text-xl "> {name} Md.</h3>
+        <h3 className="mt-5 font-semibold text-xl  capitalize"> {name} Md.</h3>
         <h4
           className="text-black font-medium border w-fit p-2
         bg-blue-400 rounded capitalize"

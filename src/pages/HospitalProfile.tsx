@@ -9,9 +9,11 @@ import { HospitalInfoContext } from "../context/HospitalInfo";
 import { useNavigate } from "react-router";
 
 const HospitalProfile = () => {
-  const { Hospital } = useContext(HospitalInfoContext);
+  const { hosData } = useContext(HospitalInfoContext);
 
-  const hospData = Hospital[2];
+
+
+  // const hosDatas = Hospital[2];
   const navigate = useNavigate();
 
   return (
@@ -19,7 +21,7 @@ const HospitalProfile = () => {
       <div className=" w-full p-3 border mt-3 border-blue-300 rounded-md">
         <div className=" w-5/6 hidden  md:block h-[40vh] mx-auto">
           <img
-            src={hospData?.picBanner}
+            src={hosData?.banner}
             className="w-full h-full"
             alt="banner pic"
           />
@@ -29,7 +31,7 @@ const HospitalProfile = () => {
             <div className="px-4 flex items-center justify-between flex-col md:flex-row gap-5  py-3">
               <div className=" rounded-full overflow-hidden  w-28 h-28">
                 <img
-                  src={hospData?.ProfilePic}
+                  src={hosData?.image}
                   className="w-full h-full object-cover"
                   alt="profile pic"
                 />
@@ -37,14 +39,14 @@ const HospitalProfile = () => {
               <div className="md:w-9/12 w-full ">
                 <p className="border-color px-3 uppercase py-2 w-full text-sm">
                   {" "}
-                  {hospData?.Hospital_Name}
+                  {hosData?.name}
                 </p>
                 <div className="text-sm flex items-center justify-between gap-3 mt-4">
                   <p className="w-5/6 border-color px-3 capitalize py-2 whitespace-nowrap overflow-scroll ">
-                    {hospData?.Address}
+                    {hosData?.address}
                   </p>
                   <p className="border-color px-3 capitalize py-2 text-sm">
-                    {hospData?.AddressState}
+                    {hosData?.state}
                   </p>
                 </div>
               </div>
@@ -61,7 +63,7 @@ const HospitalProfile = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.Email}
+                    {hosData?.email}
                   </p>
                 </div>
                 <div className="flex my-1 p-1 md:my-0 w-full md:w-1/2 items-center gap-2">
@@ -70,7 +72,7 @@ const HospitalProfile = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.Website}
+                    {hosData?.website}
                   </p>
                 </div>
               </div>
@@ -81,7 +83,7 @@ const HospitalProfile = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.Phone_Number}
+                    {hosData?.phone}
                   </p>
                 </div>
               </div>
@@ -98,7 +100,7 @@ const HospitalProfile = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.Type}
+                    {hosData?.type}
                   </p>
                 </div>
                 <div className="flex my-1 p-1 md:my-0 w-full md:w-1/2 items-center gap-2">
@@ -107,7 +109,7 @@ const HospitalProfile = () => {
                   </div>
                   <p className="border-color w-full px-3 py-2 overflow-scroll whitespace-nowrap text-sm ">
                     {" "}
-                    {hospData?.ownership}
+                    {hosData?.ownership}
                   </p>
                 </div>
               </div>
@@ -117,7 +119,7 @@ const HospitalProfile = () => {
                     <PhoneIcon className="text-green-700 w-5 text-xl text-center" />
                   </div>
                   <div className="flex items-center w-full  gap-2">
-                    {hospData?.facility.map((item, i) => (
+                    {hosData?.facility.map((item, i) => (
                       <p
                         className="border-color w-fit capitalize px-3 py-2 overflow-scroll whitespace-nowrap text-sm "
                         key={i}
@@ -135,7 +137,7 @@ const HospitalProfile = () => {
                 {" "}
                 availiable departments
               </h2>
-              <div className=" px-5 flex items-center gap-3 overflow-scroll">
+              {/* <div className=" px-5 flex items-center gap-3 overflow-scroll">
                 {hospData?.Available_Specialists.map((item, i) => (
                   <p
                     className=" border-color w-fit capitalize px-3 py-2 text-center whitespace-nowrap text-sm"
@@ -144,7 +146,7 @@ const HospitalProfile = () => {
                     {item}
                   </p>
                 ))}
-              </div>
+              </div> */}
             </div>
             <div className="mt-5">
               <h2 className="font-bold capitalize  mb-4 text-lg">
@@ -153,7 +155,7 @@ const HospitalProfile = () => {
               </h2>
 
               <p className=" border-color w-11/12 mx-auto capitalize px-3 py-2  text-sm leading-relaxed ">
-                {hospData?.About}
+                {hosData?.about}
               </p>
             </div>
             <div className="mt-5">
@@ -162,7 +164,7 @@ const HospitalProfile = () => {
                 hospital gallery
               </h2>
               <div className=" px-5 w-full overflow-scroll flex items-center gap-3">
-                {hospData?.OtherImages.map((item, i) => (
+                {hosData?.otherImages.map((item, i) => (
                   <div className="w-[300px] h-[100px]" key={i}>
                     <img
                       src={item}

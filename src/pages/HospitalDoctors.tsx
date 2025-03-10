@@ -1,25 +1,97 @@
-import { useContext, useState } from "react";
-import { DoctorContext } from "../context/DoctorContext";
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import { useContext, useEffect, useState } from "react";
+// import { DoctorContext } from "../context/DoctorContext";
 import { HospitalContext } from "../context/HospitalContext";
 import Pagenation from "../components/Pagenation";
 import { useNavigate } from "react-router";
 import { BiPlus } from "react-icons/bi";
+import { HospitalInfoContext } from "../context/HospitalInfo";
+import { Doctors } from "../context/DoctorContext";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const HospitalDoctors = () => {
   const { currentPage } = useContext(HospitalContext);
-  const { Doctor } = useContext(DoctorContext);
+  // const {  } = useContext(DoctorContext);
+  const { doctors, hosData, backendUrl, hosToken, fetchDoctors } =
+    useContext(HospitalInfoContext);
+
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const sortDoc = Doctor.sort((a, b) => {
-    return a.Name.localeCompare(b.Name);
+  // Make sure you have a Doctor type defined
+
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctors[]>([]);
+
+  const navigate = useNavigate();
+
+  const findHospital = async () => {
+    if (!hosData?._id) {
+      console.log("Hospital data is missing");
+      return [];
+    }
+
+    const matchedDoctors = doctors.filter(
+      (doc) => doc.hospitatId === hosData._id
+    );
+
+    return matchedDoctors;
+  };
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      const doctorsList = await findHospital();
+      setFilteredDoctors(doctorsList); // Store doctors in state
+    };
+
+    fetchDoctors();
+  }, [hosData, doctors]);
+
+  const sortDoc = [...filteredDoctors].sort((a, b) => {
+    const firstNameComparison = (a.firstName ?? "").localeCompare(
+      b.firstName ?? ""
+    );
+    if (firstNameComparison !== 0) {
+      return firstNameComparison;
+    }
+    return (a.lastName ?? "").localeCompare(b.lastName ?? "");
   });
 
   const filteredDoc = sortDoc.filter((appt) =>
-    selectedStatus === "all" ? true : appt.Field === selectedStatus
+    selectedStatus === "all" ? true : appt.field === selectedStatus
   );
-  const sortAva = filteredDoc.sort((b, a) => {
-    return a.avalaibility.localeCompare(b.avalaibility);
+
+  const sortAva = filteredDoc.sort((a, b) => {
+    return Number(b.available) - Number(a.available);
   });
-  const naviagte = useNavigate();
+  const toggleAvailability = async (id: string) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/hospital/avalibility",
+        {
+          docId: id,
+        },
+        {
+          headers: { token: hosToken },
+        }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        fetchDoctors();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.message) {
+        toast.error(
+          error.response?.data?.message || "An unknown error occurred"
+        );
+      } else {
+        toast.error("An unknown error occurred");
+      }
+    }
+  };
+  
 
   return (
     <div className="border md:px-10 px-3 py-12 mb-20">
@@ -33,9 +105,9 @@ const HospitalDoctors = () => {
           {[
             ...new Set(
               sortAva &&
-                Doctor.sort((a, b) => a.Field.localeCompare(b.Field)).map(
-                  (doc) => doc.Field
-                )
+                doctors
+                  .sort((a, b) => a.field.localeCompare(b.field))
+                  .map((doc) => doc.field)
             ),
           ].map((item, i) => (
             <option value={item} key={i}>
@@ -46,46 +118,57 @@ const HospitalDoctors = () => {
 
         <button
           className="flex items-center text-xl max-md:w-full mb-5 gap-3 justify-evenly  md:mb-10 border md:px-10 md:mr-10 md:gap-5 py-4 outline-none border-color capitalize "
-          onClick={() => naviagte("/hospital-dashboard/add-doctor")}
+          onClick={() => navigate("/hospital-dashboard/add-doctor")}
         >
           {" "}
           <span className="font-bold">add doctor</span>
           <BiPlus className="text-green-400" />
         </button>
       </div>
-      <div className="flex items-center gap-10 flex-wrap">
+      <div className="grid lg:grid-cols-4 h-screen md:grid-cols-3 sm:grid-cols-2 max-sm:justify-start max-sm:items-start items-start max-sm:grid-cols-1">
         {sortAva.slice((currentPage - 1) * 9, currentPage * 12).map((doc) => {
+          {
+            /* {doctor.map((doc) => { */
+          }
           return (
             <div
               className={`p-3 border w-[200px] max-md:w-5/6 mx-auto rounded-md ${
-                doc.avalaibility === "online"
+                doc?.available === true
                   ? "border-green-300 "
                   : "border-gray-300"
               }`}
-              key={doc._id}
-              onClick={() => naviagte(`/hospital-dashboard/doctor/${doc._id}`)}
+              key={doc?._id}
             >
               <div
+                onClick={() =>
+                  navigate(`/hospital-dashboard/doctor/${doc?._id}`)
+                }
                 className={`h-[150px] ${
-                  doc.avalaibility === "online"
-                    ? "bg-green-300 "
-                    : "bg-gray-300"
+                  doc?.available === true ? "bg-green-300 " : "bg-gray-300"
                 }`}
               >
-                <img src={doc.ProfilePic} alt="" className="w-full h-full" />
+                <img src={doc?.image} alt="" className="w-full h-full" />
               </div>
 
-              <h3>{doc.Name}</h3>
+              <h3 className="capitalize font-bold clip ">
+                {doc?.firstName} {doc?.lastName}
+              </h3>
               <div className=" flex items-center justify-between">
-                 <h5>{doc.Field}</h5>
-                 <input type="checkbox" name="" id="" />
+                <h5>{doc?.field}</h5>
+
+                <input
+                  type="checkbox"
+                  name=""
+                  id=""
+                  onChange={() => toggleAvailability(doc._id)}
+                  checked={doc?.available}
+                />
               </div>
-             
             </div>
           );
         })}
       </div>
-      <Pagenation item={Doctor} />
+      <Pagenation item={doctors} />
     </div>
   );
 };
