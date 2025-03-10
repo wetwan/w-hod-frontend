@@ -1,6 +1,6 @@
 // Desc: This file contains all the assets that are used in the project
-import Logo from "../assets/logo.png";
-import Hero from "../assets/hero.jpg";
+import Logo from "./Logo.png";
+import Hero from "./hero.jpg";
 
 import Sub from "./sub.png";
 

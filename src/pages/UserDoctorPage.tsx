@@ -1,10 +1,9 @@
-
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useNavigate, useParams } from "react-router";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useContext, useEffect, useState } from "react";
-import { HospitalContext } from "../context/HospitalContext";
+// import { HospitalContext } from "../context/HospitalContext";
 
 import Button from "../components/Button";
 import HosDoc from "../components/HosDoc";
@@ -22,8 +21,8 @@ const UserDoctorPage = () => {
   const { id } = useParams();
 
   const { openSignIn } = useClerk();
-  const { name, setName, email, setMessage, message, setEmail } =
-    useContext(HospitalContext);
+  // const { name, setName, email, setMessage, message, setEmail } =
+  //   useContext(HospitalContext);
 
   const { Doctor, hosData, backendUrl } = useContext(DoctorContext);
 
@@ -71,36 +70,36 @@ const UserDoctorPage = () => {
     }
   }, [id, Doctor]);
 
-  const handleReview = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast.error("Please input your email");
-      return;
-    }
-    if (!name.trim()) {
-      toast.error("Please input your name");
-      return;
-    }
-    if (!message.trim()) {
-      toast.error("Please input your review");
-      return;
-    }
+  // const handleReview = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   if (!email.trim()) {
+  //     toast.error("Please input your email");
+  //     return;
+  //   }
+  //   if (!name.trim()) {
+  //     toast.error("Please input your name");
+  //     return;
+  //   }
+  //   if (!message.trim()) {
+  //     toast.error("Please input your review");
+  //     return;
+  //   }
 
-    const data = {
-      name,
-      email,
-      message,
-      Doctor_id: docData?._id,
-    };
+  //   const data = {
+  //     name,
+  //     email,
+  //     message,
+  //     Doctor_id: docData?._id,
+  //   };
 
-    console.log(data);
+  //   console.log(data);
 
-    toast.success("Review submitted successfully!");
+  //   toast.success("Review submitted successfully!");
 
-    setEmail("");
-    setName("");
-    setMessage("");
-  };
+  //   setEmail("");
+  //   setName("");
+  //   setMessage("");
+  // };
   const { user } = useUser();
 
   return (
@@ -252,7 +251,7 @@ const UserDoctorPage = () => {
               </p>
             </div>
 
-            <div className="mt-5">
+            {/* <div className="mt-5">
               <h2 className="font-bold capitalize  mb-4 text-lg">
                 leave a Review
               </h2>
@@ -298,34 +297,35 @@ const UserDoctorPage = () => {
                   text="submit"
                 />
               </form>
-            </div>
+            </div> */}
           </div>
-          <div className="lg:border flex flex-col-reverse lg:block rounded-lg w-full lg:p-4 col-span-2 md:mt-0">
-            <div>
-              {relatedDoctors.length > 0 && (
-                <h2 className="font-medium capitalize mb-4 text-lg">
-                  Related Doctors
-                </h2>
-              )}
-              <div className="text-sm">
-                {relatedDoctors.map((item) => (
-                  <div key={item._id}>
-                    <HosDoc
-                      name={item.Name}
-                      id={item._id}
-                      field={item.field}
-                      image={item.image}
-                    />
-                  </div>
-                ))}
+          {relatedDoctors.length > 0 && (
+            <div className="lg:border flex flex-col-reverse lg:block rounded-lg w-full lg:p-4 col-span-2 md:mt-0">
+              <div>
+                {relatedDoctors.length > 0 && (
+                  <h2 className="font-medium capitalize mb-4 text-lg">
+                    Related Doctors
+                  </h2>
+                )}
+                <div className="text-sm">
+                  {relatedDoctors.map((item) => (
+                    <div key={item._id}>
+                      <HosDoc
+                        name={item.Name}
+                        id={item._id}
+                        field={item.field}
+                        image={item.image}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="mt-4">
+              {/* <div className="mt-4">
               <h2 className="font-bold capitalize  mb-4 text-lg">
                 doctor reviwes
               </h2>
-              {/* <div className="text-sm ">
+              <div className="text-sm ">
                 {docData?.Review.map((item, i) => (
                   <Review
                     key={i}
@@ -334,9 +334,10 @@ const UserDoctorPage = () => {
                     email={item.email}
                   />
                 ))}
-              </div> */}
+              </div>
+            </div> */}
             </div>
-          </div>
+          )}
         </div>
       </div>
       <Footer />
