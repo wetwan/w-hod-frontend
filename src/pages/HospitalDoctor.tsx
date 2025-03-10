@@ -1,16 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useParams } from "react-router";
 import { useContext, useEffect, useState } from "react";
-import { HospitalContext } from "../context/HospitalContext";
 import { Doctors } from "../context/DoctorContext";
-import Review from "../components/Review";
 import { CiMail } from "react-icons/ci";
 import { CgWebsite } from "react-icons/cg";
 import { BiCalendar, BiPhone } from "react-icons/bi";
 import { FaGraduationCap } from "react-icons/fa6";
 import { GiLabCoat } from "react-icons/gi";
-import { DoctorContext } from "../context/DoctorContext";
 import { HospitalInfoContext } from "../context/HospitalInfo";
 
 const HospitalDoctor = () => {

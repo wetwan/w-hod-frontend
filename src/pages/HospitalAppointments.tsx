@@ -10,7 +10,6 @@ const HospitalAppointments = () => {
   const { currentPage } = useContext(HospitalContext);
   const { appointment,hosData } = useContext(HospitalInfoContext);
   const [selectedStatus, setSelectedStatus] = useState("all");
-  // const [appointments, setAppointments] = useState<Appointments>();
 
   const checkHospitalId = appointment.filter(
     (appt) => appt.hospitalId._id === hosData?._id

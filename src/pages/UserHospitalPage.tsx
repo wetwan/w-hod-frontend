@@ -1,29 +1,36 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useParams } from "react-router";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useContext, useEffect, useState } from "react";
-import { HospitalContext } from "../context/HospitalContext";
 import { BiMailSend } from "react-icons/bi";
 import { FaChair, FaInternetExplorer } from "react-icons/fa6";
 import { BuildingOffice2Icon, PhoneIcon } from "@heroicons/react/24/solid";
 import HosDoc from "../components/HosDoc";
-import Button from "../components/Button";
-import Review from "../components/Review";
-import { toast } from "react-toastify";
-import { DoctorContext } from "../context/DoctorContext";
+import { DoctorContext, Doctors } from "../context/DoctorContext";
 import { HospitalInfoContext, newHospital } from "../context/HospitalInfo";
+
 
 const UserHospitalPage = () => {
   const { id } = useParams();
-  const { name, setName, email, setMessage, message, setEmail } =
-    useContext(HospitalContext);
 
   const { Doctor } = useContext(DoctorContext);
   const { Hospital } = useContext(HospitalInfoContext);
 
   const [hospData, setHospData] = useState<newHospital | null>(null);
+   const [doc, setDoc] = useState<Doctors[]>();
+    const fecthAppointment = async () => {
+      const data = Doctor.filter((app) => app.hospitatId === hospData?._id);
+      if (data.length !== 0) {
+        setDoc(data);
+      }
+    };
+    useEffect(() => {
+      if (Doctor.length > 0) {
+        fecthAppointment();
+      }
+    });
+  
 
   const fetchHos = async () => {
     const data = Hospital.filter((hos) => hos._id === id);
@@ -38,34 +45,7 @@ const UserHospitalPage = () => {
     }
   }, [id, Hospital]);
 
-  const handleReview = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast.error("Please input your email");
-      return;
-    }
-    if (!name.trim()) {
-      toast.error("Please input your name");
-      return;
-    }
-    if (!message.trim()) {
-      toast.error("Please input your review");
-      return;
-    }
-
-    const data = {
-      name: name.trim(),
-      email: email.trim(),
-      message: message.trim(),
-      Hospital_Id: hospData?._id,
-    };
-    toast.success("Review submitted successfully!");
-
-    // Reset the fields
-    setEmail("");
-    setName("");
-    setMessage("");
-  };
+  
 
   return (
     <>
@@ -189,16 +169,18 @@ const UserHospitalPage = () => {
                 {" "}
                 availiable departments
               </h2>
-              {/* <div className=" px-5 flex items-center gap-3 overflow-scroll">
-                {hospData?.Available_Specialists.map((item, i) => (
-                  <p
-                    className=" border-color w-fit capitalize px-3 py-2 text-center whitespace-nowrap text-sm"
-                    key={i}
-                  >
-                    {item}
-                  </p>
-                ))}
-              </div> */}
+              <div className=" px-5 flex items-center gap-3 overflow-scroll">
+                {[...new Set(doc?.map((hos) => hos.field))].map(
+                  (item, i) => (
+                    <p
+                      className=" border-color w-fit capitalize px-3 py-2 text-center whitespace-nowrap text-sm"
+                      key={i}
+                    >
+                      {item}
+                    </p>
+                  )
+                )}
+              </div>
             </div>
             <div className="mt-5">
               <h2 className="font-bold capitalize  mb-4 text-lg">
@@ -227,54 +209,7 @@ const UserHospitalPage = () => {
                 ))}
               </div>
             </div>
-            <div className="mt-5">
-              <h2 className="font-bold capitalize  mb-4 text-lg">
-                {" "}
-                leave a Review
-              </h2>
-              <form className="pb-5" onClick={handleReview}>
-                <div className="gap-5 md:gap-10  flex md:items-center flex-col md:flex-row md:px-4 justify-between">
-                  <div className="flex flex-col w-full">
-                    <label htmlFor="name">Name</label>
-                    <input
-                      type="text"
-                      className="md:mt-4 mt-2 border border-color px-3 py-2 capitalize outline-none"
-                      placeholder="john doe"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex flex-col  w-full">
-                    <label htmlFor="email">Email</label>
-                    <input
-                      type="email"
-                      className="md:mt-4 mt-2 border outline-none border-color px-3 py-2"
-                      placeholder="Joghdoe@email.com"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="mt-5 md:px-4">
-                  <label className="mb-3 block" htmlFor="textarea">
-                    Meassage
-                  </label>
-                  <textarea
-                    id="textarea"
-                    className="border-color py-3 w-full px-3 max-h-28 min-h-28 md:min-h-[100px] md:max-h-[100px] placeholder-shown:capitalize text-xl overflow-scroll outline-none"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="please leave your message"
-                  ></textarea>
-                </div>
-                <Button
-                  className="md:ml-4 capitalize border-color px-10 mt-3 py-3"
-                  text="submit"
-                />
-              </form>
-            </div>
+         
           </div>
           <div className="lg:border flex flex-col-reverse lg:block rounded-lg w-full lg:p-4 col-span-2 md:mt-0">
             <div className="">
@@ -297,22 +232,7 @@ const UserHospitalPage = () => {
                   ))}
               </div>
             </div>
-            <div className="mt-4">
-              <h2 className="font-bold capitalize  mb-4 text-lg">
-                {" "}
-                hospital reviwes
-              </h2>
-              <div className="text-sm ">
-                {/* {hospData?.Review.map((item, i) => (
-                  <Review
-                    key={i}
-                    name={item.name}
-                    review={item.Comment}
-                    email={item.email}
-                  />
-                ))} */}
-              </div>
-            </div>
+           
           </div>
         </div>
       </div>

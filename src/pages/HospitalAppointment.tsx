@@ -122,14 +122,7 @@ const HospitalAppointment = () => {
                 {" "}
                 this appointment was cancelled
               </p>
-              <div className="">
-                <h5 className="text-gray-100 mt-5 font-semibold">
-                  Reason for cancelation
-                </h5>
-                {/* <p className="md:w-4/6 mt-5 border-color px-3 py-2">
-                  {appData?.reason}
-                </p> */}
-              </div>
+           
             </div>
           )}
           {appBio?.status === "Pending" && (

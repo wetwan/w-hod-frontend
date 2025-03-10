@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 
 import { useContext, useEffect, useState } from "react";
-// import { DoctorContext } from "../context/DoctorContext";
 import { HospitalContext } from "../context/HospitalContext";
 import Pagenation from "../components/Pagenation";
 import { useNavigate } from "react-router";
@@ -14,12 +13,10 @@ import axios from "axios";
 
 const HospitalDoctors = () => {
   const { currentPage } = useContext(HospitalContext);
-  // const {  } = useContext(DoctorContext);
   const { doctors, hosData, backendUrl, hosToken, fetchDoctors } =
     useContext(HospitalInfoContext);
 
   const [selectedStatus, setSelectedStatus] = useState("all");
-  // Make sure you have a Doctor type defined
 
   const [filteredDoctors, setFilteredDoctors] = useState<Doctors[]>([]);
 

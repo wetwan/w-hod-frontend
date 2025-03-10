@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router";
 import { HospitalInfoContext } from "../context/HospitalInfo";
@@ -36,8 +36,6 @@ const HospitalProfileEdit = () => {
     setAbout,
     hosToken,
     hosData,
-    setHosData,
-    setHosToken,
     backendUrl,
   } = useContext(HospitalInfoContext);
   const navigate = useNavigate();

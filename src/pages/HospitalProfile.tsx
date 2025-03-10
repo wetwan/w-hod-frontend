@@ -1,5 +1,5 @@
 import Footer from "../components/Footer";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { BiMailSend } from "react-icons/bi";
 import { FaChair, FaInternetExplorer } from "react-icons/fa6";
@@ -7,13 +7,24 @@ import { BuildingOffice2Icon, PhoneIcon } from "@heroicons/react/24/solid";
 
 import { HospitalInfoContext } from "../context/HospitalInfo";
 import { useNavigate } from "react-router";
+import { DoctorContext, Doctors } from "../context/DoctorContext";
 
 const HospitalProfile = () => {
   const { hosData } = useContext(HospitalInfoContext);
+  const { Doctor } = useContext(DoctorContext);
+  const [doc, setDoc] = useState<Doctors[]>();
+  const fecthAppointment = async () => {
+    const data = Doctor.filter((app) => app.hospitatId === hosData?._id);
+    if (data.length !== 0) {
+      setDoc(data);
+    }
+  };
+  useEffect(() => {
+    if (Doctor.length > 0) {
+      fecthAppointment();
+    }
+  });
 
-
-
-  // const hosDatas = Hospital[2];
   const navigate = useNavigate();
 
   return (
@@ -137,16 +148,18 @@ const HospitalProfile = () => {
                 {" "}
                 availiable departments
               </h2>
-              {/* <div className=" px-5 flex items-center gap-3 overflow-scroll">
-                {hospData?.Available_Specialists.map((item, i) => (
-                  <p
-                    className=" border-color w-fit capitalize px-3 py-2 text-center whitespace-nowrap text-sm"
-                    key={i}
-                  >
-                    {item}
-                  </p>
-                ))}
-              </div> */}
+              <div className=" px-5 flex items-center gap-3 overflow-scroll">
+                {[...new Set(doc?.map((hos) => hos.field))].map(
+                  (item, i) => (
+                    <p
+                      className=" border-color w-fit capitalize px-3 py-2 text-center whitespace-nowrap text-sm"
+                      key={i}
+                    >
+                      {item}
+                    </p>
+                  )
+                )}
+              </div>
             </div>
             <div className="mt-5">
               <h2 className="font-bold capitalize  mb-4 text-lg">
@@ -184,7 +197,6 @@ const HospitalProfile = () => {
                 scrollTo(0, 0);
               }}
             >
-           
               edit
             </button>
           </div>

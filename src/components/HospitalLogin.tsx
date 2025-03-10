@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useContext, useEffect, useState } from "react";
 import { HospitalInfoContext } from "../context/HospitalInfo";
 import { FaHospital, FaX } from "react-icons/fa6";

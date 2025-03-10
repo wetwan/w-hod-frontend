@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useNavigate, useParams } from "react-router";
 import Navbar from "../components/Navbar";
@@ -8,7 +8,6 @@ import { HospitalContext } from "../context/HospitalContext";
 
 import Button from "../components/Button";
 import HosDoc from "../components/HosDoc";
-import Review from "../components/Review";
 import { CiMail } from "react-icons/ci";
 import { CgWebsite } from "react-icons/cg";
 import { BiCalendar, BiPhone } from "react-icons/bi";
