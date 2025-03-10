@@ -17,6 +17,8 @@ import { useClerk, useUser } from "@clerk/clerk-react";
 import { DoctorContext, Doctors } from "../context/DoctorContext";
 
 import axios from "axios";
+import Spinner from "../components/Spinner";
+import { HospitalInfoContext, newHospital } from "../context/HospitalInfo";
 const UserDoctorPage = () => {
   const { id } = useParams();
 
@@ -24,9 +26,30 @@ const UserDoctorPage = () => {
   // const { name, setName, email, setMessage, message, setEmail } =
   //   useContext(HospitalContext);
 
-  const { Doctor, hosData, backendUrl } = useContext(DoctorContext);
+  const { Doctor, backendUrl, loading, setLoading } =
+    useContext(DoctorContext);
+  const { Hospital} =
+    useContext(HospitalInfoContext);
 
   const [docData, setDocData] = useState<Doctors | null>(null);
+  const [hospData, sethosData] = useState<newHospital | null>(null);
+
+  useEffect(() => {
+    const fetchhos = async () => {
+      setLoading(true);
+      if (docData && docData.hospitatId && Hospital.length > 0) {
+        const data = Hospital.find((hos) => hos._id === docData.hospitatId);
+
+        if (data) {
+          sethosData(data);
+        }
+      }
+    };
+
+    fetchhos();
+    setLoading(false);
+  }, [Doctor, Hospital, docData]);
+
 
   const navigate = useNavigate();
 
@@ -46,6 +69,7 @@ const UserDoctorPage = () => {
       const { data } = await axios.get(backendUrl + `/api/doctor/doctor/${id}`);
       if (data.success) {
         setDocData(data.doctor);
+        setLoading(false);
       } else {
         toast.error(data.message);
       }
@@ -67,6 +91,7 @@ const UserDoctorPage = () => {
   useEffect(() => {
     if (Doctor.length > 0) {
       fetchDoc();
+      setLoading(false);
     }
   }, [id, Doctor]);
 
@@ -105,6 +130,7 @@ const UserDoctorPage = () => {
   return (
     <>
       <Navbar />
+      {loading && <Spinner loading={loading} />}
       <div className="mt-28 w-full p-3">
         <div className=" w-5/6 hidden  md:block h-[40vh] mx-auto">
           <img
@@ -143,7 +169,7 @@ const UserDoctorPage = () => {
                 </p>
                 <div className="text-sm flex items-center justify-between gap-3 mt-4">
                   <p className="w-5/6 border-color px-3 capitalize py-2 whitespace-nowrap overflow-scroll ">
-                    {hosData?.name}
+                    {hospData?.name}
                   </p>
                 </div>
               </div>

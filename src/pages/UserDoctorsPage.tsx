@@ -7,6 +7,7 @@ import Pagenation from "../components/Pagenation";
 import { MagnifyingGlassIcon, UsersIcon } from "@heroicons/react/24/solid";
 import Footer from "../components/Footer";
 import { DoctorContext } from "../context/DoctorContext";
+import Spinner from "../components/Spinner";
 
 const UserDoctorsPage = () => {
   const {
@@ -19,6 +20,8 @@ const UserDoctorsPage = () => {
     setCurrentPage,
     handleSearch,
     doctorRef,
+    loading,
+    setLoading,
   } = useContext(HospitalContext);
 
   const { Doctor } = useContext(DoctorContext);
@@ -33,6 +36,7 @@ const UserDoctorsPage = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
     const matchesDoctorFeild = (Doctor: { field?: string }) =>
       doctorField.length === 0 || doctorField.includes(Doctor.field ?? "");
 
@@ -51,6 +55,7 @@ const UserDoctorsPage = () => {
     );
     setFilterdoctor(newFilteredDocotor);
     setCurrentPage(1);
+    setLoading(false);
   }, [Doctor, doctorField, search, setCurrentPage]);
 
   return (
@@ -146,22 +151,25 @@ const UserDoctorsPage = () => {
               ) : (
                 <p className=" ml-4 text-red-400 capitalize">No doctor found</p>
               )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-3 px-4 py-5">
-                {filterdoctor
-                  .slice((currentPage - 1) * 9, currentPage * 9)
-                  .map((item) => (
-                    <DoctorCard
-                      key={item._id}
-                      Field={item.field}
-                      image={item.image}
-                      id={item._id}
-                      name={`${item.firstName} ${item.lastName}`}
-                      hospitalName={item.Hospital_Name}
-                      state={item.state}
-                    />
-                  ))}
-              </div>
+              {loading ? (
+                <Spinner loading={loading} />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-3 px-4 py-5">
+                  {filterdoctor
+                    .slice((currentPage - 1) * 9, currentPage * 9)
+                    .map((item) => (
+                      <DoctorCard
+                        key={item._id}
+                        Field={item.field}
+                        image={item.image}
+                        id={item._id}
+                        name={`${item.firstName} ${item.lastName}`}
+                        hospitalName={item.Hospital_Name}
+                        state={item.state}
+                      />
+                    ))}
+                </div>
+              )}
             </div>
             <Pagenation item={filterdoctor} />
           </div>

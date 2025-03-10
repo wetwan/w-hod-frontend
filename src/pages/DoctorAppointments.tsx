@@ -8,11 +8,13 @@ import { DoctorContext } from "../context/DoctorContext";
 import { HospitalInfoContext } from "../context/HospitalInfo";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Spinner from "../components/Spinner";
 
 const DoctorAppointments = () => {
   const navigate = useNavigate();
 
-  const { currentPage, backendUrl } = useContext(HospitalContext);
+  const { currentPage, backendUrl, loading, setLoading } =
+    useContext(HospitalContext);
 
   const { appointment, fetchAppointment } = useContext(HospitalInfoContext);
   const { docData, docToken } = useContext(DoctorContext);
@@ -42,6 +44,7 @@ const DoctorAppointments = () => {
       );
       if (data.success) {
         fetchAppointment();
+        setLoading(false);
       } else {
         toast.error(data.message);
       }
@@ -77,91 +80,84 @@ const DoctorAppointments = () => {
               <th className="py-3 px-4  text-left">Status</th>
             </tr>
           </thead>
-          <tbody>
-            {filteredAppointments.length > 0 ? (
-              filteredAppointments
-                .slice((currentPage - 1) * 9, currentPage * 9)
-                .map((appt) => (
-                  <tr
-                    key={appt._id}
-                    className="border-b   cursor-pointer hover:bg-gray-50 even:bg-blue-50 odd:bg-green-50"
-                    onClick={() =>
-                      navigate(`/doctor-dashboard/appointment/${appt._id}`)
-                    }
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <td className="py-3 px-4  max-md:hidden">
-                      <img
-                        src={appt.userId.image}
-                        alt={`Dr. ${appt.userId.firstName}`}
-                        className="w-12 h-12 rounded-full max-md:hidden"
-                      />
-                    </td>
-                    <td className="text-lg font-semibold py-3 px-4 ">
-                      {appt.userId.firstName} {appt.userId.lastName}
-                    </td>
-                    <td className="text-sm py-3 px-4 ">
-                      {moment(appt.slotDate).format("ll")}
-                    </td>
-                    <td className="text-sm py-3 px-4 ">
-                      {moment(appt.slotTime, "HH:mm").format("hh:mm A")}
-                    </td>
-                    <td className={`py-3 px-4  order relative `}>
-                      <div className="relative px-4 inline-block  text-left group">
-                        <button className="text-gray-500 action-button ">
-                          {appt.status}...
-                        </button>
-                        <div className="z-10 hidden absolute right-0 md:left-0 top-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow group-hover:block  ">
-                          <button
-                            onClick={() =>
-                              ChnagAppointment(appt._id, "Pending")
-                            }
-                            className="block font-bold w-full text-left px-4 py-3 text-yellow-300 hover:bg-yellow-100"
-                          >
-                            Pending
+
+          {loading && filteredAppointments.length > 0  ? (
+            <Spinner loading={loading} />
+          ) : (
+            <tbody>
+              {filteredAppointments.length > 0 ? (
+                filteredAppointments
+                  .slice((currentPage - 1) * 9, currentPage * 9)
+                  .map((appt) => (
+                    <tr
+                      key={appt._id}
+                      className="border-b   cursor-pointer hover:bg-gray-50 even:bg-blue-50 odd:bg-green-50"
+                      onClick={() =>
+                        navigate(`/doctor-dashboard/appointment/${appt._id}`)
+                      }
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <td className="py-3 px-4  max-md:hidden">
+                        <img
+                          src={appt.userId.image}
+                          alt={`Dr. ${appt.userId.firstName}`}
+                          className="w-12 h-12 rounded-full max-md:hidden"
+                        />
+                      </td>
+                      <td className="text-lg font-semibold py-3 px-4 ">
+                        {appt.userId.firstName} {appt.userId.lastName}
+                      </td>
+                      <td className="text-sm py-3 px-4 ">
+                        {moment(appt.slotDate).format("ll")}
+                      </td>
+                      <td className="text-sm py-3 px-4 ">
+                        {moment(appt.slotTime, "HH:mm").format("hh:mm A")}
+                      </td>
+                      <td className={`py-3 px-4  order relative `}>
+                        <div className="relative px-4 inline-block  text-left group">
+                          <button className="text-gray-500 action-button ">
+                            {appt.status}...
                           </button>
-                          <button
-                            onClick={() =>
-                              ChnagAppointment(appt._id, "Cancelled")
-                            }
-                            className="block w-full text-left px-4 py-3 text-red-300 font-bold hover:bg-yellow-100"
-                          >
-                            Cancelled
-                          </button>
-                          <button
-                            onClick={() =>
-                              ChnagAppointment(appt._id, "Successful")
-                            }
-                            className="block w-full text-left px-4 py-3 text-green-300 font-bold hover:bg-yellow-100"
-                          >
-                            Successful
-                          </button>
+                          <div className="z-10 hidden absolute right-0 md:left-0 top-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow group-hover:block  ">
+                            <button
+                              onClick={() =>
+                                ChnagAppointment(appt._id, "Pending")
+                              }
+                              className="block font-bold w-full text-left px-4 py-3 text-yellow-300 hover:bg-yellow-100"
+                            >
+                              Pending
+                            </button>
+                            <button
+                              onClick={() =>
+                                ChnagAppointment(appt._id, "Cancelled")
+                              }
+                              className="block w-full text-left px-4 py-3 text-red-300 font-bold hover:bg-yellow-100"
+                            >
+                              Cancelled
+                            </button>
+                            <button
+                              onClick={() =>
+                                ChnagAppointment(appt._id, "Successful")
+                              }
+                              className="block w-full text-left px-4 py-3 text-green-300 font-bold hover:bg-yellow-100"
+                            >
+                              Successful
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      {/* <select
-                        name=""
-                        id=""
-                        value={appt.status}
-                        onChange={(e) => setChangeStatus(e.target.value)}
-                        className="bg-transparent   border-none outline-none w-full h-full"
-                        onClick={() => ChnagAppointment(appt._id, changeStatus)}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="canceled">Canceled</option>
-                        <option value="successful">Successful</option>
-                      </select> */}
-                    </td>
-                  </tr>
-                ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center text-gray-500">
-                  No appointments found.
-                </td>
-              </tr>
-            )}
-          </tbody>
+                      </td>
+                    </tr>
+                  ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center text-gray-500">
+                    No appointments found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          )}
         </table>
 
         <Pagenation item={appointment} />

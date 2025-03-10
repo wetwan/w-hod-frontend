@@ -39,6 +39,8 @@ export type Doctors = {
   slot_booked: { [key: string]: string[] };
 };
 type UseDoctorInfo = {
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
   backendUrl: string;
   Doctor: Doctors[];
   doctors: Doctors | null;
@@ -95,6 +97,8 @@ type UseDoctorInfo = {
 };
 
 const initContext: UseDoctorInfo = {
+  loading: false,
+  setLoading: () => {},
   sethosData: () => {},
   backendUrl: "",
   hosData: null,
@@ -184,6 +188,7 @@ const DoctorContextProvider = ({
   const [doctors, setDoctors] = useState<Doctors | null>(null);
   const [hosData, sethosData] = useState<newHospital | null>(null);
   const [appointment, setAppointment] = useState<Appointments[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const { Hospital } = useContext(HospitalInfoContext);
 
   const fetchDoctor = async () => {
@@ -191,7 +196,7 @@ const DoctorContextProvider = ({
       const { data } = await axios.get(backendUrl + "/api/user/doctor/");
       if (data.success) {
         setDoctor(data.doctors);
-        // setDoctors(data.doctors);
+        setLoading(false);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.message) {
@@ -204,11 +209,14 @@ const DoctorContextProvider = ({
     }
   };
   useEffect(() => {
+    setLoading(true);
     fetchDoctor();
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     const fetchhos = async () => {
+      setLoading(true);
       if (docData && docData.hospitatId && Hospital.length > 0) {
         const data = Hospital.find((hos) => hos._id === docData.hospitatId);
 
@@ -219,6 +227,7 @@ const DoctorContextProvider = ({
     };
 
     fetchhos();
+    setLoading(false);
   }, [Doctor, Hospital, docData]);
 
   // fetch hospital data
@@ -229,6 +238,7 @@ const DoctorContextProvider = ({
       });
       if (data.success) {
         setDocData(data.doctor);
+        setLoading(true)
       } else {
         toast.error(data.message);
       }
@@ -253,22 +263,27 @@ const DoctorContextProvider = ({
     }
   };
   useEffect(() => {
+    setLoading(true)
     if (docToken) {
       fetchDoctorData();
       fetchAppointment();
     }
+    setLoading(false)
   }, [docToken]);
-  useEffect(() => {}, []);
   useEffect(() => {
+    setLoading(true)
     fetchDoctor();
     const storedDoctorToken = localStorage.getItem("doctor token");
     if (storedDoctorToken) {
       setDocToken(storedDoctorToken);
     }
+    setLoading(false)
   }, []);
   useEffect(() => {}, []);
 
   const value: UseDoctorInfo = {
+    loading,
+    setLoading,
     appointment,
     setAppointment,
     sethosData,

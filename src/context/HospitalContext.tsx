@@ -100,17 +100,17 @@ export type Appointments = {
 export type AppointmentDetail = {
   _id: string; // Appointment Detail ID
   appointmentID: {
-    _id: string;  // Appointment ID
-    date: number;  // Date of the appointment (Unix timestamp)
+    _id: string; // Appointment ID
+    date: number; // Date of the appointment (Unix timestamp)
   };
   blood_pressure: string;
-  date: number;  // Date in milliseconds (Unix timestamp)
+  date: number; // Date in milliseconds (Unix timestamp)
   diagnosis: string;
   doctorId: {
-    _id: string;  // Doctor ID
-    firstName: string;  // Doctor's first name
-    lastName: string;  // Doctor's last name
-    image: string;  // URL of the doctor's image
+    _id: string; // Doctor ID
+    firstName: string; // Doctor's first name
+    lastName: string; // Doctor's last name
+    image: string; // URL of the doctor's image
   };
   history: string;
   prescriptions: string;
@@ -118,7 +118,7 @@ export type AppointmentDetail = {
   reason: string;
   respiration: string;
   temperature: string;
-  __v: number;  // Version key, typically used by Mongoose
+  __v: number; // Version key, typically used by Mongoose
 };
 
 // UseHospital type
@@ -195,6 +195,8 @@ type UseHospital = {
   appointmentDetails: AppointmentDetail[];
   setAppointmentDetails: (AppointmentDetails: AppointmentDetail[]) => void;
   fetchAppointmentDeatils: () => void;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
 };
 const initContext: UseHospital = {
   fetchAppointmentDeatils: () => {},
@@ -270,6 +272,8 @@ const initContext: UseHospital = {
   kinStateOf: "",
   setKinStateOf: () => {},
   backendUrl: "",
+  loading: false,
+  setLoading: () => {},
 };
 
 export const HospitalContext = createContext<UseHospital>(initContext);
@@ -286,7 +290,9 @@ const HospitalContextProvider = ({
   const [isSearched, setIsSearched] = useState<boolean>(false);
   const [userData, setUserData] = useState<Userd | null>(null);
   const [AppointmentData, setAppointmentData] = useState<AppointmentData[]>([]);
-  const [appointmentDetails, setAppointmentDetails] = useState<AppointmentDetail[]>([]);
+  const [appointmentDetails, setAppointmentDetails] = useState<
+    AppointmentDetail[]
+  >([]);
 
   const [appointment, setAppointment] = useState<Appointments[]>([]);
   const [appoint, setAppoint] = useState<Appointments | null>(null);
@@ -317,10 +323,14 @@ const HospitalContextProvider = ({
   const [kinPhoneNumber, setKinPhoneNumber] = useState<string>("1234567890");
   const [kinRelationships, setKinRelationships] = useState<string>("sister");
   const [kinStateOf, setKinStateOf] = useState<string>("osun");
+  
+  const [loading, setLoading] = useState<boolean>(false);
+  
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { user } = useUser();
   const { getToken } = useAuth();
+
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSearch({
@@ -330,11 +340,13 @@ const HospitalContextProvider = ({
     setIsSearched(true);
   };
   const fetchAppointment = async () => {
+    setLoading(true);
     try {
       const { data } = await axios.get(backendUrl + "/api/user/appointments");
 
       if (data.success) {
         setAppointment(data.appointments);
+        setLoading(false);
       } else {
         toast.error(data.message);
       }
@@ -347,12 +359,13 @@ const HospitalContextProvider = ({
     }
   };
   const fetchAppointmentDeatils = async () => {
+    setLoading(true);
     try {
       const { data } = await axios.get(backendUrl + "/api/user/details");
 
       if (data.success) {
         setAppointmentDetails(data.appointment);
-      
+        setLoading(false);
       } else {
         toast.error(data.message);
       }
@@ -366,6 +379,7 @@ const HospitalContextProvider = ({
   };
 
   const fetchUser = async () => {
+    setLoading(true);
     try {
       const token = await getToken();
       if (!token) {
@@ -379,6 +393,7 @@ const HospitalContextProvider = ({
 
       if (data.success) {
         setUserData(data.user);
+        setLoading(false);
       } else {
         toast.error(data.message);
       }
@@ -393,21 +408,24 @@ const HospitalContextProvider = ({
     }
   };
 
-  const fetchUserProfile = async () => {};
-
   useEffect(() => {
-    fetchUserProfile();
+    setLoading(true);
     fetchAppointmentDeatils();
+    setLoading(false);
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     if (user) {
       fetchUser();
       fetchAppointment();
     }
+    setLoading(false);
   }, [user]);
 
   const value = {
+    loading,
+    setLoading,
     fetchAppointmentDeatils,
     appointmentDetails,
     setAppointmentDetails,
@@ -439,7 +457,6 @@ const HospitalContextProvider = ({
     fetchAppointment,
     setAppointment,
     appointment,
-    fetchUserProfile,
     image,
     setImage,
     phoneNumber,

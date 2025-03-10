@@ -7,9 +7,10 @@ import { FaGraduationCap } from "react-icons/fa6";
 import { GiLabCoat } from "react-icons/gi";
 
 import { DoctorContext, Doctors,} from "../context/DoctorContext";
+import Spinner from "../components/Spinner";
 
 const DoctorProfile = () => {
-  const { Doctor, hosData } = useContext(DoctorContext);
+  const { Doctor, hosData ,loading} = useContext(DoctorContext);
 
   const [docData, setdocData] = useState<Doctors | null>(null);
  
@@ -24,7 +25,8 @@ const DoctorProfile = () => {
 
   return (
     <>
-      <div
+    {
+      loading ? <Spinner loading={loading} />:<div
         className={` ${
           docData?.available === true ? "border-green-300" : "border-gray-300"
         } rounded-md  mt-3  w-full md:w-[99%]  p-3 border`}
@@ -181,6 +183,8 @@ const DoctorProfile = () => {
           </div>
         </div>
       </div>
+    }
+      
     </>
   );
 };

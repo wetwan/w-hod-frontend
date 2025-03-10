@@ -5,10 +5,11 @@ import { BsPenFill } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
 import { useContext } from "react";
 import { DoctorContext } from "../context/DoctorContext";
+import Spinner from "../components/Spinner";
 
 const Doctor = () => {
   const navigate = useNavigate();
-  const { docData, setDocToken, setDocData } = useContext(DoctorContext);
+  const { docData, setDocToken, setDocData,loading } = useContext(DoctorContext);
   const logout = () => {
     setDocToken(null);
     localStorage.removeItem("hospital token");
@@ -88,7 +89,10 @@ const Doctor = () => {
             </ul>
           </div>
           <div className="w-[80%] mb-24 overflow-scroll">
-            <Outlet />
+            {
+              loading ? < Spinner loading={loading} /> :  <Outlet />
+            }
+          
           </div>
         </div>
         <footer className="bottom-0 fixed p-3  text-center border w-full  uppercase font-bold text-xl  bg">

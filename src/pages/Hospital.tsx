@@ -5,19 +5,19 @@ import { assets } from "../assets";
 import { GiDoctorFace } from "react-icons/gi";
 import { useContext } from "react";
 import { HospitalInfoContext } from "../context/HospitalInfo";
+import Spinner from "../components/Spinner";
 
 const Hospital = () => {
   const navigate = useNavigate();
 
-  const { hosData,setHosData,setHosToken } = useContext(HospitalInfoContext);
+  const { hosData, setHosData, setHosToken, loading } =
+    useContext(HospitalInfoContext);
   const logout = () => {
-    setHosToken(null)
-    localStorage.removeItem("hospital token")
-    setHosData(null)
-    navigate('/')
-
-
-  }
+    setHosToken(null);
+    localStorage.removeItem("hospital token");
+    setHosData(null);
+    navigate("/");
+  };
   return (
     <div className="min-h-screen ">
       <div className="w-full bg shadow-md">
@@ -44,10 +44,7 @@ const Hospital = () => {
                 />
                 <div className="absolute hidden  group-hover:block mt-1  px-7 py-4 bg-black rounded-lg ">
                   <ul className=" ">
-                    <li
-                      className="cursor-pointer"
-                      onClick={() => logout()}
-                    >
+                    <li className="cursor-pointer" onClick={() => logout()}>
                       log out
                     </li>
                   </ul>
@@ -102,9 +99,13 @@ const Hospital = () => {
             </NavLink>
           </ul>
         </div>
-        <div className="w-[80%] mb-24 overflow-scroll">
-          <Outlet />
-        </div>
+        {loading ? (
+          <Spinner loading={loading} />
+        ) : (
+          <div className="w-[80%] mb-24 overflow-scroll">
+            <Outlet />
+          </div>
+        )}
       </div>
       <footer className="bottom-0 fixed p-3  text-center border w-full  uppercase font-bold text-xl  bg">
         <span className="text-blue-600 mx-2">w-hos </span> &copy; {/* */}

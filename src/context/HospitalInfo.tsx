@@ -14,7 +14,6 @@ import { toast } from "react-toastify";
 import { Appointments } from "./HospitalContext";
 import { Doctors } from "./DoctorContext";
 
-
 export type newHospital = {
   _id: string;
   name: string;
@@ -33,6 +32,8 @@ export type newHospital = {
 };
 type UseHospitalInfo = {
   appointment: Appointments[];
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
   setAppointment: (appointment: Appointments[]) => void;
   Hospital: newHospital[];
   setHospital: (hospitals: newHospital[]) => void;
@@ -86,6 +87,8 @@ type UseHospitalInfo = {
 };
 
 const initContext: UseHospitalInfo = {
+  loading: false,
+  setLoading: () => {},
   hosToken: null,
   setHosToken: () => {},
   doctors: [],
@@ -169,14 +172,17 @@ const HospitalInfoContextProvider = ({
   const [hosData, setHosData] = useState<newHospital | null>(null);
   const [doctors, setDoctors] = useState<Doctors[]>([]);
   const [appointment, setAppointment] = useState<Appointments[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const fetchHospital = async () => {
+    setLoading(true)
     try {
       const { data } = await axios.get(backendUrl + "/api/user/hospital");
       if (data.success) {
         setHospital(data.hospitals);
+        setLoading(false)
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.message) {
@@ -191,12 +197,14 @@ const HospitalInfoContextProvider = ({
 
   // fetch hospital data
   const fetchHospitalData = async () => {
+    
     try {
       const { data } = await axios.get(backendUrl + `/api/hospital/hospital`, {
         headers: { token: hosToken },
       });
       if (data.success) {
         setHosData(data.hospital);
+        setLoading(false)
       } else {
         toast.error(data.message);
       }
@@ -219,6 +227,7 @@ const HospitalInfoContextProvider = ({
 
       if (data.success) {
         setDoctors(data.doctors);
+        setLoading(false)
       } else {
         toast.error(data.message);
       }
@@ -230,16 +239,13 @@ const HospitalInfoContextProvider = ({
   };
   const fetchAppointment = async () => {
     try {
-     
       const { data } = await axios.get(
-        backendUrl + "/api/hospital/appointments",
-        
+        backendUrl + "/api/hospital/appointments"
       );
-   
 
       if (data.success) {
         setAppointment(data.appointments);
-    
+        setLoading(false)
       } else {
         // Handling errors from the server if 'success' is false
         toast.error(data.message || "Something went wrong.");
@@ -258,29 +264,37 @@ const HospitalInfoContextProvider = ({
   };
 
   useEffect(() => {
+    setLoading(true)
     fetchHospital();
     const storeHospialTkoen = localStorage.getItem("hospital token");
     if (storeHospialTkoen) {
       setHosToken(storeHospialTkoen);
     }
+    setLoading(false)
   }, []);
   useEffect(() => {
+    setLoading(true)
     if (hosToken) {
       fetchHospitalData();
-     
     }
+    setLoading(false)
   }, [hosToken]);
   useEffect(() => {
+    setLoading(true)
     if (hosToken) {
       fetchDoctors();
     }
+    setLoading(false)
   }, [hosToken]);
   useEffect(() => {
+    setLoading(true)
     fetchAppointment();
+    setLoading(false)
   }, []);
 
-
   const value: UseHospitalInfo = {
+    loading,
+    setLoading,
     fetchAppointment,
     appointment,
     setAppointment,
